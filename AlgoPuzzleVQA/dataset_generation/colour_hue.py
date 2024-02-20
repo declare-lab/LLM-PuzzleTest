@@ -244,7 +244,6 @@ if __name__ == "__main__":
         while out_of_position == 0:
             shuffled_image, shuffled_grid, swaps, out_of_position, order = shuffle(full_grid, size, cols)
         
-        instance_image = final_image(shuffled_image, image)
         question, answer = swap_question(1, cols), swaps
 
         solution = {
@@ -257,6 +256,7 @@ if __name__ == "__main__":
         if solution not in solution_set:
             solution_set.append(solution)
 
+            instance_image = final_image(shuffled_image, image)
             fname = f"data/images/colour_hue/colour_hue_{question_index:04}.jpg"
             instance_image.save(fname, dpi=(300, 300))
             example = {
@@ -287,7 +287,6 @@ if __name__ == "__main__":
         while out_of_position == 0:
             shuffled_image, shuffled_grid, swaps, out_of_position, order = shuffle(full_grid, size, to_shuffle)
 
-        instance_image = final_image(shuffled_image, image)
         question, answer = swap_question(rows, cols), swaps
 
         solution = {
@@ -300,6 +299,7 @@ if __name__ == "__main__":
         if solution not in solution_set:
             solution_set.append(solution)
             
+            instance_image = final_image(shuffled_image, image)
             fname = f"data/images/colour_hue/colour_hue_{question_index:04}.jpg"
             instance_image.save(fname, dpi=(300, 300))
             example = {

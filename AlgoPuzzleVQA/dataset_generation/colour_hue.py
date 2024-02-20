@@ -254,20 +254,19 @@ if __name__ == "__main__":
         }
 
         # Ensure no repetition of data
-        if solution in solution_set:
-            break
-        solution_set.append(solution)
+        if solution not in solution_set:
+            solution_set.append(solution)
 
-        fname = f"data/images/colour_hue/colour_hue_{question_index:04}.jpg"
-        instance_image.save(fname, dpi=(300, 300))
-        example = {
-            "image": fname, "question": question, "answer": answer,
-            "solution": solution
-        }
+            fname = f"data/images/colour_hue/colour_hue_{question_index:04}.jpg"
+            instance_image.save(fname, dpi=(300, 300))
+            example = {
+                "image": fname, "question": question, "answer": answer,
+                "solution": solution
+            }
 
-        data.append(example)
-        question_index += 1
-        progress_bar.update(1)
+            data.append(example)
+            question_index += 1
+            progress_bar.update(1)
 
 
     size = (1024, 1024)
@@ -298,20 +297,19 @@ if __name__ == "__main__":
         }
 
         # Ensure no repetition of data
-        if solution in solution_set:
-            break
-        solution_set.append(solution)
-        
-        fname = f"data/images/colour_hue/colour_hue_{question_index:04}.jpg"
-        instance_image.save(fname, dpi=(300, 300))
-        example = {
-            "image": fname, "question": question, "answer": answer,
-            "solution": solution
-        }
+        if solution not in solution_set:
+            solution_set.append(solution)
+            
+            fname = f"data/images/colour_hue/colour_hue_{question_index:04}.jpg"
+            instance_image.save(fname, dpi=(300, 300))
+            example = {
+                "image": fname, "question": question, "answer": answer,
+                "solution": solution
+            }
 
-        data.append(example)
-        question_index += 1
-        progress_bar.update(1)
+            data.append(example)
+            question_index += 1
+            progress_bar.update(1)
 
 
     with open("data/colour_hue.json", "w") as f:

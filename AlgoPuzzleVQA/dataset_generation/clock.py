@@ -101,7 +101,6 @@ if __name__ == "__main__":
 
     os.makedirs("data/images/clock")
 
-
     data, question_index, num_instances = [], 0, 100
     progress_bar = tqdm(range(num_instances))
     solution_set = []

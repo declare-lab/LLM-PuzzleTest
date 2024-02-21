@@ -8,7 +8,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from collections import defaultdict
-from puzzle import Puzzle
+from utils.puzzle import Puzzle
 
 
 class WoodSlide(Puzzle):

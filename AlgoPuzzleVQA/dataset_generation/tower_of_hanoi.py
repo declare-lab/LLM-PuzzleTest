@@ -191,7 +191,7 @@ if __name__ == "__main__":
     progress_bar = tqdm(range(num_instances))
     solution_set = []
 
-    while question_index < num_instances:    
+    while question_index < num_instances:
         num_disks = np.random.choice([3, 4, 5, 6], p=[0.13, 0.21, 0.33, 0.33])
         answer = np.random.choice([1, 2, 3, 4, 5, 6], p=[0.18, 0.18, 0.17, 0.16, 0.16, 0.15])
         

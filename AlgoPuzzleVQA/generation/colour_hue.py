@@ -6,7 +6,6 @@ import random
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from IPython.display import display
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 
 

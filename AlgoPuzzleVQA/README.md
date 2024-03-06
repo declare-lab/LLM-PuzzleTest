@@ -1,4 +1,4 @@
-### Setup
+## Setup
 
 ```
 conda create -n algo python=3.10 -y
@@ -6,10 +6,42 @@ conda activate algo
 pip install -r requirements.txt
 ```
 
-### Model Evaluation
+## Dataset
 
-Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en)
-or [GPT-4(V)](https://platform.openai.com/docs/guides/vision)
+The data for the puzzles is available in the [data](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/data) directory. Each json file contains 100 instances of each puzzle. Each line in the jsons correspond to a single puzzle instance. Each line has the following structure:
+
+```json
+{
+    "image": "path/to/image/file.jpg", 
+    "question": "information about the puzzle and the question", 
+    "options": ["option1", "option2", "option3", "option4"], 
+    "answer": "correct option", 
+    "solution": {
+        "puzzle_specific_information1": "..",
+        "puzzle_specific_information2": "..",
+        "..": ".." 
+    }
+}
+```
+
+## Dataset Generation
+
+The scripts for generating the puzzles is available in the [generation](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/generation) directory. The scripts can be used as follows:
+
+```bash
+cd generation
+mkdir data
+mkdir images
+
+python board_tile.py
+python tower_of_hanoi.py
+...
+```
+
+
+## Model Evaluation
+
+Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en) or [GPT-4(V)](https://platform.openai.com/docs/guides/vision)
 
 The currently supported model names are `[gemini_vision, openai_vision]`
 
@@ -27,7 +59,7 @@ python main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name lla
 [21:33<00:00, 12.94s/it, score=0.27]
 ```
 
-### API Setup
+## API Setup
 
 Gemini Pro (multimodal): Please create a file named `gemini_vision_info.json`
 

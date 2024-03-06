@@ -20,7 +20,7 @@ The configuration of the puzzle/problem is shown as an image, which constitutes 
  - Text
 
 <p align="center">
-  <img src=img/teaser_visual.pdf />
+  <img src=img/teaser_visual.png />
 </p>
 
 
@@ -37,7 +37,7 @@ We also identify the algorithmic concepts required for solving the puzzles i.e. 
  - Sets
 
 <p align="center">
-  <img src=img/teaser_algorithm.pdf />
+  <img src=img/teaser_algorithm.png />
 </p>
 
 The algorithmic categories are not mutually exclusive, as we need to use two or more categories to derive the answer for most puzzles.

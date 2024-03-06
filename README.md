@@ -41,13 +41,13 @@ The algorithmic categories are not mutually exclusive, as we need to use two or 
 
 ## Dataset
 
-The dataset is available [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/data). We created a total of 18 different puzzles spanning various algorithmic and mathematical topics. Many of these puzzles are popular in various recreational or academic settings.
+The dataset is available [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/data). The format of the files are shown [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA#dataset). We created a total of 18 different puzzles spanning various algorithmic and mathematical topics. Many of these puzzles are popular in various recreational or academic settings.
 
-In total, we have 1800 instances from the 18 different puzzles. These instances are analogous to different test cases of the puzzle, i.e.  they have different input combinations, initial and goal states, etc. Reliably solving all the instances would require finding the exact algorithm to use and then applying it accurately. This is akin to how we verify the accuracy of a computer program aiming to solve a particular task through a broad range of test cases.
+In total, we have 1800 instances from the 18 different puzzles. These instances are analogous to different *test cases* of the puzzle, i.e.  they have different input combinations, initial and goal states, etc. Reliably solving all the instances would require finding the exact algorithm to use and then applying it accurately. This is akin to how we verify the accuracy of a computer program aiming to solve a particular task through a broad range of test cases.
 
-We currently consider the full dataset as an evaluation-only benchmark. The detailed examples of all puzzles are shown [here](https://github.com/declare-lab/puzzle-reasoning/blob/master/puzzles.md).
+We currently consider the full dataset as an **evaluation-only** benchmark. The detailed examples of all puzzles are shown [here](https://github.com/declare-lab/puzzle-reasoning/blob/master/puzzles.md).
 
-The code for generating the dataset can be found [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/generation). The number of instances and the difficulty of the puzzles can be scaled arbitrarily to any desired size or level.
+The code for generating the dataset can be found [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/generation). The scripts can be used following the instructions [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA#dataset-generation). The number of instances and the difficulty of the puzzles can be scaled arbitrarily to any desired size or level.
 
 
 ## Ontology

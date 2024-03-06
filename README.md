@@ -1,5 +1,6 @@
 # Multimodal Puzzle Reasoning
 
+> 📣 We are releasing AlgoPuzzleVQA, a novel and challenging dataset for multimodal reasoning! Soon, we will release more multimodal puzzle datasets. Stay tuned!
 
 ## Algorithmic Puzzles
 

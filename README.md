@@ -2,6 +2,8 @@
 
 > 📣 We are releasing AlgoPuzzleVQA, a novel and challenging dataset for multimodal reasoning! Soon, we will release more multimodal puzzle datasets. Stay tuned!
 
+[Paper](https://github.com/declare-lab/puzzle-reasoning/blob/master/AlgoPuzzleVQA.pdf) | [Website](https://algopuzzlevqa.github.io/)
+
 ## Algorithmic Puzzles
 
 We introduce the novel task of multimodal puzzle solving, framed within the context of visual question-answering. We present a new dataset, AlgoPuzzleVQA designed to challenge and evaluate the capabilities of multimodal language models in solving algorithmic puzzles that necessitate both visual understanding, language understanding, and complex algorithmic reasoning. We create the puzzles to encompass a diverse array of mathematical and algorithmic topics such as boolean logic, combinatorics, graph theory, optimization, search, etc., aiming to evaluate the gap between visual data interpretation and algorithmic problem-solving skills. The dataset is generated automatically from code authored by humans. All our puzzles have exact solutions that can be found from the algorithm without tedious human calculations. It ensures that our dataset can be scaled up arbitrarily in terms of reasoning complexity and dataset size. Our investigation reveals that large language models (LLMs) such as GPT4V and Gemini exhibit limited performance in puzzle-solving tasks. We find that their performance is near random in a multi-choice question-answering setup for a significant number of puzzles. The findings emphasize the challenges of integrating visual, language, and algorithmic knowledge for solving complex reasoning problems.

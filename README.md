@@ -2,7 +2,7 @@
 
 > 📣 We are releasing AlgoPuzzleVQA, a novel and challenging dataset for multimodal reasoning! Soon, we will release more multimodal puzzle datasets. Stay tuned!
 
-[Paper](https://github.com/declare-lab/puzzle-reasoning/blob/master/AlgoPuzzleVQA.pdf) | [Website](https://algopuzzlevqa.github.io/)
+[Paper](https://arxiv.org/pdf/2403.03864.pdf) | [Website](https://algopuzzlevqa.github.io/)
 
 ## Algorithmic Puzzles
 

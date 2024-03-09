@@ -1,16 +1,15 @@
 import json
 import time
-from typing import Optional, List
-
-import google.generativeai as genai
 import torch
+import anthropic
 from PIL import Image
 from fire import Fire
 from openai import OpenAI
 from pydantic import BaseModel
-from transformers import AutoProcessor, LlavaForConditionalGeneration, LlavaProcessor
-
+from typing import Optional, List
+import google.generativeai as genai
 from data_loading import convert_image_to_text, load_image
+from transformers import AutoProcessor, LlavaForConditionalGeneration, LlavaProcessor
 
 
 class EvalModel(BaseModel, arbitrary_types_allowed=True):
@@ -196,11 +195,69 @@ class LlavaModel(EvalModel):
         return self.processor.decode(outputs[prompt_length:], skip_special_tokens=True)
 
 
+class ClaudeModel(EvalModel):
+    model_path: str = "claude_info.json"
+    timeout: int = 60
+    engine: str = ""
+    client: Optional[OpenAI]
+
+    def load(self):
+        with open(self.model_path) as f:
+            info = json.load(f)
+            self.engine = info["engine"]
+            self.client = anthropic.Anthropic(api_key=info["key"], timeout=self.timeout)
+
+    def make_messages(self, prompt: str, image: Image = None) -> List[dict]:
+        image_media_type = "image/png"
+        image_data = convert_image_to_text(self.resize_image(image))
+
+        inputs = [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": image_media_type,
+                    "data": image_data,
+                },
+            },
+            {"type": "text", "text": prompt},
+        ]
+
+        return [{"role": "user", "content": inputs}]
+
+    def run(self, prompt: str, image: Image = None) -> str:
+        self.load()
+        output = ""
+        error_message = "The response was filtered"
+
+        while not output:
+            try:
+                response = self.client.messages.create(
+                    model=self.engine,
+                    messages=self.make_messages(prompt, image),
+                    temperature=self.temperature,
+                    max_tokens=512,
+                )
+
+                output = response.content[0].text
+
+            except Exception as e:
+                print(e)
+                if error_message in str(e):
+                    output = error_message
+
+            if not output:
+                print("ClaudeModel request failed, retrying.")
+
+        return output
+
+
 def select_model(model_name: str, **kwargs) -> EvalModel:
     model_map = dict(
         gemini_vision=GeminiVisionModel,
         openai_vision=OpenAIVisionModel,
         llava=LlavaModel,
+        claude=ClaudeModel,
     )
     model_class = model_map.get(model_name)
     if model_class is None:
@@ -223,6 +280,7 @@ def test_model(
 p modeling.py test_model --model_name gemini_vision
 p modeling.py test_model --model_name openai_vision
 p modeling.py test_model --model_name llava
+p modeling.py test_model --model_name claude 
 """
 
 

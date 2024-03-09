@@ -47,6 +47,7 @@ def evaluate_multi_choice(
     if (
         "openai" in model.model_path
         or "llava" in model.model_path
+        or "claude" in model.model_path
         or not prevent_direct_answer
     ):
         prompter.base_prompter.prevent_direct_answer = False
@@ -78,6 +79,7 @@ def evaluate_multi_choice(
 """
 p main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name gemini_vision
 p main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name openai_vision
+p main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name claude
 """
 
 

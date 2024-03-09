@@ -33,7 +33,12 @@ class ChainThoughtMultiChoicePrompter(Prompter):
     def run(self, sample: Sample) -> str:
         # Following a similar format as "Large Language Models are Zero-Shot Reasoners"
         size_options = {"small", "medium", "large"}
-        assert len(sample.options) == 4 or set(sample.options) == size_options
+        binary_options = {"Yes", "No"}
+        assert (
+            len(sample.options) == 4
+            or set(sample.options) == size_options
+            or set(sample.options) == binary_options
+        )
         assert sample.answer in sample.options
 
         parts: list[str, Any] = [
@@ -41,7 +46,7 @@ class ChainThoughtMultiChoicePrompter(Prompter):
             f"Options:",
             f"(A) {sample.options[0]}",
             f"(B) {sample.options[1]}",
-            f"(C) {sample.options[2]}",
+            f"(C) {sample.options[2]}" if len(sample.options) >= 3 else "",
             f"(D) {sample.options[3]}" if len(sample.options) == 4 else "",
             "",
             f"Answer: Let's describe the image first and think step by step.",

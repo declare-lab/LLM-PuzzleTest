@@ -41,9 +41,9 @@ python tower_of_hanoi.py
 
 ## Model Evaluation
 
-Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en) or [GPT-4(V)](https://platform.openai.com/docs/guides/vision)
+Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en) or [GPT-4(V)](https://platform.openai.com/docs/guides/vision) or [Claude 3 Opus](https://docs.anthropic.com/claude/docs/vision) 
 
-The currently supported model names are `[gemini_vision, openai_vision]`
+The currently supported model names are `[gemini_vision, openai_vision, claude]`
 
 ```
 # Run evaluation on the "wheel_of_fortune" puzzle with Gemini Pro Vision
@@ -57,6 +57,11 @@ python main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name ope
 # Run evaluation on the "wheel_of_fortune" puzzle with LLaVA
 python main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name llava
 [21:33<00:00, 12.94s/it, score=0.27]
+
+# Run evaluation on the "wheel_of_fortune" puzzle with Claude 3 Opus
+python main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name claude
+[33:28<00:00, 20.09s/it, score=0.20]
+
 ```
 
 ## API Setup
@@ -71,4 +76,10 @@ GPT-4V (multimodal): Please create a file named `openai_vision_info.json`
 
 ```
 {"engine": "gpt-4-vision-preview", "key": "your_api_key"}
+```
+
+Claude 3 Opus (multimodal): Please create a file named `claude_info.json`
+
+```
+{"engine": "claude-3-opus-20240229", "key": "your_api_key"}
 ```

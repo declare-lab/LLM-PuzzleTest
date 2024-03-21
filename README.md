@@ -1,7 +1,9 @@
 # Multimodal Puzzle Reasoning with LLMs
 
-> 📣 We are releasing AlgoPuzzleVQA, a novel and challenging dataset for multimodal reasoning! Soon, we will release more multimodal puzzle datasets. Stay tuned!
+> 🔥 PuzzleVQA, our new dataset reveals serious challenges of multimodal LLMs in understanding simple abstract patterns.
+[Paper](https://arxiv.org/abs/2403.13315) | [Website](https://puzzlevqa.github.io/)
 
+> 📣 We are releasing AlgoPuzzleVQA, a novel and challenging dataset for multimodal reasoning! Soon, we will release more multimodal puzzle datasets. Stay tuned!
 [Paper](https://arxiv.org/pdf/2403.03864.pdf) | [Website](https://algopuzzlevqa.github.io/)
 
 ## Algorithmic Puzzles

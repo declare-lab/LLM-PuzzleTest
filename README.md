@@ -78,7 +78,7 @@ concepts such as colors and numbers together.
 We introduce the novel task of multimodal puzzle solving, framed within the context of visual question-answering. We present a new dataset, AlgoPuzzleVQA designed to challenge and evaluate the capabilities of multimodal language models in solving algorithmic puzzles that necessitate both visual understanding, language understanding, and complex algorithmic reasoning. We create the puzzles to encompass a diverse array of mathematical and algorithmic topics such as boolean logic, combinatorics, graph theory, optimization, search, etc., aiming to evaluate the gap between visual data interpretation and algorithmic problem-solving skills. The dataset is generated automatically from code authored by humans. All our puzzles have exact solutions that can be found from the algorithm without tedious human calculations. It ensures that our dataset can be scaled up arbitrarily in terms of reasoning complexity and dataset size. Our investigation reveals that large language models (LLMs) such as GPT4V and Gemini exhibit limited performance in puzzle-solving tasks. We find that their performance is near random in a multi-choice question-answering setup for a significant number of puzzles. The findings emphasize the challenges of integrating visual, language, and algorithmic knowledge for solving complex reasoning problems.
 
 
-## Visual Features of the Puzzles
+### Visual Features of the Puzzles
 
 The configuration of the puzzle/problem is shown as an image, which constitutes its visual context. We identify the following fundamental aspects of the visual context that influence the nature of the puzzles:
 
@@ -92,7 +92,7 @@ The configuration of the puzzle/problem is shown as an image, which constitutes 
 </p>
 
 
-## Algorithmic Features of the Puzzles
+### Algorithmic Features of the Puzzles
 
 We also identify the algorithmic concepts required for solving the puzzles i.e. for answering the questions for the puzzle instances. They are as follows:
 
@@ -111,7 +111,7 @@ We also identify the algorithmic concepts required for solving the puzzles i.e. 
 The algorithmic categories are not mutually exclusive, as we need to use two or more categories to derive the answer for most puzzles.
 
 
-## Dataset
+### Dataset
 
 The dataset is available [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/data) in [these format](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA#dataset). We created a total of 18 different puzzles spanning various algorithmic and mathematical topics. Many of these puzzles are popular in various recreational or academic settings.
 
@@ -122,7 +122,7 @@ We currently consider the full dataset as an **evaluation-only** benchmark. The 
 Instructions for generating the dataset can be found [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA#dataset-generation). The number of instances and the difficulty of the puzzles can be scaled arbitrarily to any desired size or level.
 
 
-## Ontology
+### Ontology
 
 The ontological categorization of the puzzles are as follows:
 
@@ -131,12 +131,12 @@ The ontological categorization of the puzzles are as follows:
 </p>
 
 
-## Experiments
+### Experiments
 
 The experimental setup and scripts can be found in the [AlgoPuzzleVQA](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA) directory.
 
 
-## Citation
+### Citation
 
 Please consider citing the following article if you found our work useful:
 

@@ -17,7 +17,7 @@ GPT-4V. There are generally three stages that can be observed in the solving pro
 inductive reasoning (green), and deductive reasoning (red). Here, the visual perception was incomplete, causing a
 mistake during deductive reasoning.
 
-<img src="/images/example.png" alt="" width="600" height="1000">
+<img src="/img/example.png" alt="" width="600" height="1000">
 
 ### Puzzle Components
 
@@ -27,7 +27,7 @@ template, and populate the
 template with suitable objects that demonstrate the underlying pattern. For interpretability, we also construct ground
 truth reasoning explanations to interpret the puzzle and explain the general solution stages.
 
-![](/images/components.png)
+![](/img/components.png)
 
 ### Puzzle Taxonomy
 
@@ -35,7 +35,7 @@ The figure below shows the taxonomy of abstract puzzles in PuzzleVQA with sample
 concepts
 such as colors and size. To enhance diversity, we design both single-concept and dual-concept puzzles.
 
-![](/images/taxonomy.png)
+![](/img/taxonomy.png)
 
 ### Evaluation Results
 
@@ -57,7 +57,7 @@ performance across categories but with a slightly lower overall average of 30.1.
 similarly on average for single-concept and dual-concept patterns, which suggests that they are able to relate multiple
 concepts such as colors and numbers together.
 
-![](/images/results.png)
+![](/img/results.png)
 
 
 ### Citation

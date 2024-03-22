@@ -1,0 +1,15 @@
+Pillow==10.1.0
+black==23.12.1
+fire==0.5.0
+google-generativeai==0.3.2
+numpy==1.26.2
+matplotlib==3.8.2
+openai==1.6.1
+pydantic==1.10.13
+tqdm==4.66.1
+pandas==2.2.0
+pyarrow==15.0.0
+reportlab==4.0.9
+torch==2.2.0
+transformers==4.37.2
+anthropic==0.19.1

@@ -356,7 +356,7 @@ class ColorNumberHexagonPattern(BaseModel):
                 question="What is the missing number of the part denoted with a question mark?",
                 answer=answer,
                 options=[str(o) for o in generate_number_options(answer, k=4)],
-                image_caption=f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order. The parts are denoted with the numbers {numbers} respectively.",
+                caption=f"There is a hexagon split into six parts with the colors {names} in an anti-clockwise order. The parts are denoted with the numbers {numbers} respectively.",
                 explanation=f"We observe that the numbers in the {instances[0]} parts add up to {value}. Similarly, the numbers in the {instances[1]} parts also add up to {value}. Thus, the pattern is that the numbers in the parts of the same color add up to {value}.",
                 deduction=f"Based on the pattern that the numbers in the parts of the same color add up to {value}, the missing number of the {names[i_answer]} part should be {answer}.",
             ),
@@ -1881,12 +1881,6 @@ def create_data(
     while len(samples) < limit:
         sample, image = pattern.make_sample()
         count += 1
-        print(
-            f"LOOP FOR {question_idx}"
-            + "%" * 20
-            + f"COUNT {count}"
-            + f"LENGTH {len(seen)}"
-        )
 
         sample_check = copy.deepcopy(sample)
         image_string = convert_image_to_text(image)

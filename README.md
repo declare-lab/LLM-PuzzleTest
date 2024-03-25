@@ -6,6 +6,14 @@
 > 📣 We are releasing AlgoPuzzleVQA, a novel and challenging dataset for multimodal reasoning! Soon, we will release more multimodal puzzle datasets. Stay tuned!
 [Paper](https://arxiv.org/pdf/2403.03864.pdf) | [Website](https://algopuzzlevqa.github.io/)
 
+We are excited to announce the release of two groundbreaking VQA datasets centered around puzzles:
+
+1) **[PuzzleVQA](https://github.com/declare-lab/LLM-PuzzleTest/tree/master/PuzzleVQA):** This dataset features abstract visual patterns meticulously crafted to challenge the fundamental reasoning capabilities of MLLMs.
+2) **[AlgoPuzzleVQA](https://github.com/declare-lab/LLM-PuzzleTest/tree/master/AlgoPuzzleVQA):** Delving deeper into complexity, this dataset presents advanced puzzles that demand algorithmic solutions.
+
+The performance of MLLMs on both datasets is notably deficient, underscoring the pressing need for substantial enhancements in their multimodal reasoning capabilities.
+
+
 ## PuzzleVQA
 
 Large multimodal models extend the impressive capabilities of large language models by integrating multimodal understanding abilities. However, it is not clear how they can emulate the general intelligence and reasoning ability of humans. As recognizing patterns and abstracting concepts are key to general intelligence, we introduce PuzzleVQA, a collection of puzzles based on abstract patterns. With this dataset, we evaluate large multimodal models with abstract patterns based on fundamental concepts, including colors, numbers, sizes, and shapes. Through our experiments on state-of-the-art large multimodal models, we find that they are not able to generalize well to simple abstract patterns. Notably, even GPT-4V cannot solve more than half of the puzzles. To diagnose the reasoning challenges in large multimodal models, we progressively guide the models with our ground truth reasoning explanations for visual perception, inductive reasoning, and deductive reasoning. Our systematic analysis finds that the main bottlenecks of GPT-4V are weaker visual perception and inductive reasoning abilities. Through this work, we hope to shed light on the limitations of large multimodal models and how they can better emulate human cognitive processes in the future.

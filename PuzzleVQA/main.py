@@ -26,7 +26,7 @@ def evaluate_multi_choice(
     image_dir: str = "data",
     prompt_name: str = "cot_multi_extract",
     output_dir: str = "outputs",
-    prevent_direct_answer: bool = True,
+    prevent_direct_answer: bool = False,
     use_describe_image_prompt: bool = True,
     **kwargs,
 ):
@@ -44,12 +44,7 @@ def evaluate_multi_choice(
     model = select_model(**kwargs)
 
     # GPT-4V sometimes becomes very lazy when prompted not to directly give the final answer
-    if (
-        "openai" in model.model_path
-        or "llava" in model.model_path
-        or "claude" in model.model_path
-        or not prevent_direct_answer
-    ):
+    if not prevent_direct_answer:
         prompter.base_prompter.prevent_direct_answer = False
     if not use_describe_image_prompt:
         prompter.base_prompter.use_describe_image_prompt = False

@@ -17,8 +17,8 @@ class RottingKiwiPattern:
     image_size: int = 512
     path_font: str = "fonts/OpenSans-Light.ttf"
 
-    kiwi = "templates/puzzle-rotting-kiwi/kiwi.png"
-    cross = "templates/puzzle-rotting-kiwi/cross.png"
+    kiwi = "templates/rotting_kiwi/kiwi.png"
+    cross = "templates/rotting_kiwi/cross.png"
 
     def calculate_answer(self, grid) -> int:
         # number of rows

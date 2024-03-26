@@ -51,7 +51,7 @@ def chessboard(fig, ax, size):
 
 def add_queen(ax, coord):
     # Add a queen to the board
-    img = plt.imread("templates/queen.png")
+    img = plt.imread("templates/n_queens/queen.png")
     imagebox = OffsetImage(img, zoom=0.15)
     ab = AnnotationBbox(imagebox, coord, frameon=False)
     ax.add_artist(ab)

@@ -13,3 +13,7 @@ reportlab==4.0.9
 torch==2.2.0
 transformers==4.37.2
 anthropic==0.19.1
+Shapely==2.0.3
+num2words==0.5.13
+magiccube==0.2.10
+scipy==1.12.0

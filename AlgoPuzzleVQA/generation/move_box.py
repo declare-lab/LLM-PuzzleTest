@@ -14,10 +14,10 @@ class MoveBoxPattern:
     image_size: int = 512
     path_font: str = "fonts/OpenSans-Light.ttf"
 
-    box = "templates/puzzle-move-box/box.png"
-    brick = "templates/puzzle-move-box/brick.png"
-    end = "templates/puzzle-move-box/end.png"
-    person = "templates/puzzle-move-box/person.png"
+    box = "templates/move_box/box.png"
+    brick = "templates/move_box/brick.png"
+    end = "templates/move_box/end.png"
+    person = "templates/move_box/person.png"
 
     def calculate_answer(self, grid) -> int:
         # this loop is to get the coordinates of target, box and person. Nothing else is gained here

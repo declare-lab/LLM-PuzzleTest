@@ -9,7 +9,13 @@ from pydantic import BaseModel
 from typing import Optional, List
 import google.generativeai as genai
 from data_loading import convert_image_to_text, load_image
-from transformers import AutoProcessor, LlavaForConditionalGeneration, LlavaProcessor
+from transformers import (
+    AutoProcessor,
+    LlavaForConditionalGeneration,
+    LlavaProcessor,
+    AutoModelForCausalLM,
+    AutoTokenizer,
+)
 
 
 class EvalModel(BaseModel, arbitrary_types_allowed=True):
@@ -252,12 +258,52 @@ class ClaudeModel(EvalModel):
         return output
 
 
+class QwenModel(EvalModel):
+    model_path = "Qwen/Qwen-VL-Chat"
+    template = "USER: <image>\n{prompt}\nASSISTANT:"
+    device: str = "cuda"
+    dtype: torch.dtype = torch.float16
+    model: Optional[AutoModelForCausalLM] = None
+    tokenizer: Optional[AutoTokenizer] = None
+
+    def load(self):
+        if self.model is None:
+            self.model = (
+                AutoModelForCausalLM.from_pretrained(
+                    self.model_path,
+                    device_map="cuda",
+                    trust_remote_code=True,
+                    bf16=True,
+                )
+                .eval()
+                .to(self.device)
+            )
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                self.model_path, trust_remote_code=True
+            )
+
+    def run(self, prompt: str, image: str) -> str:
+        self.load()
+        prompt = self.template.format(prompt=prompt)
+
+        query = self.tokenizer.from_list_format(
+            [
+                {"image": f"data/{image}"},
+                {"text": prompt},
+            ]
+        )
+
+        response, _ = self.model.chat(self.tokenizer, query=query, history=None)
+        return response
+
+
 def select_model(model_name: str, **kwargs) -> EvalModel:
     model_map = dict(
         gemini_vision=GeminiVisionModel,
         openai_vision=OpenAIVisionModel,
         llava=LlavaModel,
         claude=ClaudeModel,
+        qwen=QwenModel,
     )
     model_class = model_map.get(model_name)
     if model_class is None:

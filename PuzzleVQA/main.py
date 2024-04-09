@@ -50,9 +50,13 @@ def evaluate_multi_choice(
         prompter.base_prompter.use_describe_image_prompt = False
 
     for sample in progress:
-        # Initial zero-shot prompting
         sample.prompt = prompter.base_prompter.run(sample)
-        image = convert_text_to_image(sample.image_string)
+
+        if "qwen" in model_name:
+            image = sample.image
+        else:
+            image = convert_text_to_image(sample.image_string)
+
         sample.raw_output = model.run(sample.prompt, image)
         sample.pred = prompter.get_answer(sample.raw_output, sample.options)
 

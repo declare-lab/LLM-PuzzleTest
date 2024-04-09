@@ -13,3 +13,8 @@ reportlab==4.0.9
 torch==2.2.0
 transformers==4.37.2
 anthropic==0.19.1
+tiktoken==0.6.0
+einops==0.7.0 
+transformers_stream_generator==0.0.5
+torchvision==0.17.0
+accelerate==0.28.0

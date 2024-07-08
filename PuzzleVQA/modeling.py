@@ -320,7 +320,7 @@ class BedrockModel(EvalModel):
                     "format": image_media_type,
                     "source": {
                         "bytes": image_data
-					}
+                    }
                 },
             },
             {
@@ -343,7 +343,7 @@ class BedrockModel(EvalModel):
                     inferenceConfig={
                         "temperature": self.temperature,
                         "maxTokens": 512
-					}
+                    }
                 )
                 output = response['output']['message']['content'][0]['text']
             except Exception as e:

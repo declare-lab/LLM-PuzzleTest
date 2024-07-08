@@ -22,6 +22,13 @@ def convert_image_to_text(image: Image) -> str:
     return base64.b64encode(data).decode("utf-8")
 
 
+def convert_image_to_bytes(image: Image) -> bytes:
+    with io.BytesIO() as output:
+        image.save(output, format="PNG")
+        data = output.getvalue()
+    return data
+
+
 def convert_text_to_image(text: str) -> Image:
     data = base64.b64decode(text.encode("utf-8"))
     return Image.open(io.BytesIO(data))

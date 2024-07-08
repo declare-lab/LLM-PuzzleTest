@@ -68,18 +68,26 @@ python main.py evaluate_multi_choice data/wheel_of_fortune.json --model_name cla
 
 Gemini Pro (multimodal): Please create a file named `gemini_vision_info.json`
 
-```
+```json
 {"engine": "gemini-pro-vision", "key": "your_api_key"}
 ```
 
 GPT-4V (multimodal): Please create a file named `openai_vision_info.json`
 
-```
+```json
 {"engine": "gpt-4-vision-preview", "key": "your_api_key"}
 ```
 
 Claude 3 Opus (multimodal): Please create a file named `claude_info.json`
 
-```
+```json
 {"engine": "claude-3-opus-20240229", "key": "your_api_key"}
+```
+
+Claude 3.5 Sonnet (multimodal) via [Amazon Bedrock](https://aws.amazon.com/bedrock/claude/): Please create a file named `bedrock_info.json`
+
+> 💡 For more information on how to select a default AWS Region and setup AWS credentials, please refer to the [AWS Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html) (Developer Guide > Credentials).
+
+```json
+{"engine": "anthropic.claude-3-5-sonnet-20240620-v1:0"}
 ```

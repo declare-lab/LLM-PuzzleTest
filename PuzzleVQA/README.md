@@ -56,19 +56,20 @@ python data_generation.py create_data <puzzle_name>
 
 ## Model Evaluation
 
-Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en) or [GPT-4(V)](https://platform.openai.com/docs/guides/vision) or [Claude 3 Opus](https://docs.anthropic.com/claude/docs/vision) 
+Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en), [GPT-4(V)](https://platform.openai.com/docs/guides/vision) or [Claude 3 Opus](https://docs.anthropic.com/claude/docs/vision) (via Anthropic API or Amazon Bedrock).
 
 ### Example to run evalution on "triangle" puzzle with Gemini Pro 
 ```bash
 python main.py evaluate_multi_choice data/triangle.json \
---model_name gemini_vision \
---prompt_name cot_multi_extract \
+    --model_name gemini_vision \
+    --prompt_name cot_multi_extract
 ```
 
 ### Supported Models
 - `gemini_vision`
 - `openai_vision`
 - `claude`
+- `bedrock`
 
 ### Supported Prompts
 - `cot_multi_extract`
@@ -80,18 +81,26 @@ python main.py evaluate_multi_choice data/triangle.json \
 
 Gemini Pro (multimodal): Please create a file named `gemini_vision_info.json`
 
-```
+```json
 {"engine": "gemini-pro-vision", "key": "your_api_key"}
 ```
 
 GPT-4V (multimodal): Please create a file named `openai_vision_info.json`
 
-```
+```json
 {"engine": "gpt-4-vision-preview", "key": "your_api_key"}
 ```
 
 Claude 3 Opus (multimodal): Please create a file named `claude_info.json`
 
-```
+```json
 {"engine": "claude-3-opus-20240229", "key": "your_api_key"}
+```
+
+Claude 3.5 Sonnet (multimodal) via [Amazon Bedrock](https://aws.amazon.com/bedrock/claude/): Please create a file named `bedrock_info.json`
+
+> 💡 For more information on how to select a default AWS Region and setup AWS credentials, please refer to the [AWS Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html) (Developer Guide > Credentials).
+
+```json
+{"engine": "anthropic.claude-3-5-sonnet-20240620-v1:0"}
 ```

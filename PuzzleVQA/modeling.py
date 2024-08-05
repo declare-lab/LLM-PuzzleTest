@@ -2,13 +2,15 @@ import json
 import time
 import torch
 import anthropic
+import botocore
+import boto3
 from PIL import Image
 from fire import Fire
 from openai import OpenAI
 from pydantic import BaseModel
 from typing import Optional, List
 import google.generativeai as genai
-from data_loading import convert_image_to_text, load_image
+from data_loading import convert_image_to_text, convert_image_to_bytes, load_image
 from transformers import (
     AutoProcessor,
     LlavaForConditionalGeneration,
@@ -297,6 +299,64 @@ class QwenModel(EvalModel):
         return response
 
 
+class BedrockModel(EvalModel):
+    model_path: str = "bedrock_info.json"
+    engine: str = ""
+    client: Optional[botocore.client.BaseClient]
+
+    def load(self):
+        with open(self.model_path) as f:
+            info = json.load(f)
+            self.engine = info["engine"]
+            self.client = boto3.client('bedrock-runtime')
+
+    def make_messages(self, prompt: str, image: Image = None) -> List[dict]:
+        image_media_type = "png"
+        image_data = convert_image_to_bytes(self.resize_image(image))
+
+        inputs = [
+            {
+                "image": {
+                    "format": image_media_type,
+                    "source": {
+                        "bytes": image_data
+                    }
+                },
+            },
+            {
+                "text": prompt
+            },
+        ]
+
+        return [{"role": "user", "content": inputs}]
+
+    def run(self, prompt: str, image: Image = None) -> str:
+        self.load()
+        output = ""
+        error_message = "The response was filtered"
+
+        while not output:
+            try:
+                response = self.client.converse(
+                    modelId=self.engine,
+                    messages=self.make_messages(prompt, image),
+                    inferenceConfig={
+                        "temperature": self.temperature,
+                        "maxTokens": 512
+                    }
+                )
+                output = response['output']['message']['content'][0]['text']
+            except Exception as e:
+                print(e)
+                if error_message in str(e):
+                    output = error_message
+
+            if not output:
+                print("BedrockModel request failed, retrying...")
+
+        return output
+
+
 def select_model(model_name: str, **kwargs) -> EvalModel:
     model_map = dict(
         gemini_vision=GeminiVisionModel,
@@ -304,6 +364,7 @@ def select_model(model_name: str, **kwargs) -> EvalModel:
         llava=LlavaModel,
         claude=ClaudeModel,
         qwen=QwenModel,
+        bedrock=BedrockModel,
     )
     model_class = model_map.get(model_name)
     if model_class is None:

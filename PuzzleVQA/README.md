@@ -65,14 +65,16 @@ python data_generation.py create_data <puzzle_name>
 
 ## Model Evaluation
 
-Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en), [GPT-4(V)](https://platform.openai.com/docs/guides/vision) or [Claude 3 Opus](https://docs.anthropic.com/claude/docs/vision) (via Anthropic API or Amazon Bedrock).
+Run zero-shot evaluation with LLMs
+like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en), [GPT-4(V)](https://platform.openai.com/docs/guides/vision)
+or [Claude 3 Opus](https://docs.anthropic.com/claude/docs/vision) (via Anthropic API or Amazon Bedrock).
 
 ### Example to evaluate on "triangle" puzzle with Gemini Pro
 
 ```bash
 python main.py evaluate_multi_choice data/triangle.json \
 --model_name gemini_15_pro \
---prompt_name cot_multi_extract \
+--prompt_name cot_multi_extract
 ```
 
 ### Example to evaluate on all puzzles
@@ -90,10 +92,10 @@ python main.py print_results outputs/*/*/*.jsonl
 - `claude_35_sonnet`
 - `gemini_1_pro`
 - `gemini_15_pro`
-- `gemini_vision`
-- `openai_vision`
-- `claude`
-- `bedrock`
+- `gemini_vision` (old)
+- `openai_vision` (old)
+- `claude` (old)
+- `bedrock` (via amazon bedrock API)
 
 ### Supported Prompts
 
@@ -106,14 +108,26 @@ python main.py print_results outputs/*/*/*.jsonl
 
 Please create a `.env` file in the root directory with the following content:
 
+### Original APIs
+
 ```
 OPENAI_KEY=your_api_key
 GEMINI_KEY=your_api_key
 CLAUDE_KEY=your_api_key
 ```
 
-Claude 3 Opus (multimodal): Please create a file named `claude_info.json`
+### Amazon Bedrock
 
-```
-{"engine": "claude-3-opus-20240229", "key": "your_api_key"}
+You can also use models such as Claude 3.5 Sonnet (multimodal)
+via [Amazon Bedrock](https://aws.amazon.com/bedrock/claude/): Please create a file named `bedrock_info.json`
+
+> 💡 For more information on how to select a default AWS Region and setup AWS credentials, please refer to
+> the [AWS Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html) (
+> Developer
+> Guide > Credentials).
+
+```json
+{
+  "engine": "anthropic.claude-3-5-sonnet-20240620-v1:0"
+}
 ```

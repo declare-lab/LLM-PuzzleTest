@@ -20,3 +20,4 @@ torchvision==0.17.0
 accelerate==0.28.0
 python-dotenv==1.0.1
 boto3==1.34.140
+datasets==2.19.2

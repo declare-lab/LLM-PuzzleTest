@@ -1,12 +1,16 @@
 import base64
+import hashlib
 import io
 import json
 import random
 from pathlib import Path
+from shutil import copyfile, rmtree
 from typing import List, Tuple
 
+import pandas as pd
 import requests
 from PIL import Image
+from datasets import load_dataset
 from fire import Fire
 from pydantic import BaseModel
 from tqdm import tqdm
@@ -100,6 +104,31 @@ class Data(BaseModel):
 def test_data(**kwargs):
     data = Data.load_with_image_dir(**kwargs)
     data.analyze()
+
+
+def upload_to_huggingface(
+    *paths: str, repo: str, data_dir: str = "data", temp_dir: str = "temp_images"
+):
+    if Path(temp_dir).exists():
+        rmtree(temp_dir)
+    Path(temp_dir).mkdir(parents=True)
+
+    data = []
+    for p in tqdm(paths):
+        with open(p) as f:
+            for line in f:
+                info = json.loads(line)
+                path_in = Path(data_dir, info.pop("image"))
+                image_id = hashlib.md5(str(info).encode()).hexdigest() + str(len(data))
+                path_out = Path(temp_dir, image_id).with_suffix(path_in.suffix)
+                copyfile(path_in, path_out)
+                info["file_name"] = path_out.name
+                data.append(dict(category=Path(p).stem, **info))
+
+    print(pd.DataFrame(data).sample(5))
+    pd.DataFrame(data).to_csv(Path(temp_dir, "metadata.csv"), index=False)
+    dataset = load_dataset("imagefolder", data_dir=temp_dir)
+    dataset.push_to_hub(repo_id=repo)
 
 
 if __name__ == "__main__":

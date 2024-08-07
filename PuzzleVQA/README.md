@@ -1,38 +1,47 @@
 ## Setup
 
 ```
-conda create -n abstract python=3.10 -y
-conda activate abstract
+conda create -n puzzle python=3.10 -y
+conda activate puzzle
 pip install -r requirements.txt
 ```
 
 ## Dataset
 
-The data for the puzzles is available in the [data](https://github.com/declare-lab/puzzle-reasoning/tree/master/PuzzleVQA/data) directory. Each json file contains 100 instances of each puzzle. Each line in the jsons correspond to a single puzzle instance. Each line has the following structure:
+The data for the puzzles is available in
+the [data](https://github.com/declare-lab/puzzle-reasoning/tree/master/PuzzleVQA/data) directory. Each json file
+contains 100 instances of each puzzle. Each line in the jsons correspond to a single puzzle instance. Each line has the
+following structure:
 
 ```json
 {
-    "image": "path/to/image/file.png", 
-    "question": "information about the puzzle and the question", 
-    "options": ["option1", "option2", "option3", "option4"], 
-    "answer": "correct option", 
-    "caption": "caption about the image",
-    "explanation": "explanation of the pattern in the image",
-    "deduction": "deduction statement of applying the pattern to derive final answer"
+  "image": "path/to/image/file.png",
+  "question": "information about the puzzle and the question",
+  "options": [
+    "option1",
+    "option2",
+    "option3",
+    "option4"
+  ],
+  "answer": "correct option",
+  "caption": "caption about the image",
+  "explanation": "explanation of the pattern in the image",
+  "deduction": "deduction statement of applying the pattern to derive final answer"
 }
 ```
 
-## Dataset Generation
+## Dataset Generation (Optional)
 
-The scripts for generating the puzzles is available in the [generation](https://github.com/declare-lab/puzzle-reasoning/tree/master/PuzzleVQA/generation) directory. The scripts can be used as follows:
+The puzzle data is included in the `data` directory. The source scripts for generating new puzzles
+can be used as follows:
 
 ```bash
 cd generation
-
 python data_generation.py create_data <puzzle_name>
 ```
 
 ### Current List of Puzzle Names
+
 - `circle_size_number`
 - `color_grid`
 - `color_hexagon`
@@ -58,49 +67,53 @@ python data_generation.py create_data <puzzle_name>
 
 Run zero-shot evaluation with LLMs like [Gemini Pro](https://ai.google.dev/tutorials/python_quickstart?hl=en), [GPT-4(V)](https://platform.openai.com/docs/guides/vision) or [Claude 3 Opus](https://docs.anthropic.com/claude/docs/vision) (via Anthropic API or Amazon Bedrock).
 
-### Example to run evalution on "triangle" puzzle with Gemini Pro 
+### Example to evaluate on "triangle" puzzle with Gemini Pro
+
 ```bash
 python main.py evaluate_multi_choice data/triangle.json \
-    --model_name gemini_vision \
-    --prompt_name cot_multi_extract
+--model_name gemini_15_pro \
+--prompt_name cot_multi_extract \
+```
+
+### Example to evaluate on all puzzles
+
+```
+bash evaluate.sh gemini_15_pro
+python main.py print_results outputs/*/*/*.jsonl
 ```
 
 ### Supported Models
+
+- `gpt4v`
+- `gpt4o`
+- `claude_3_opus`
+- `claude_35_sonnet`
+- `gemini_1_pro`
+- `gemini_15_pro`
 - `gemini_vision`
 - `openai_vision`
 - `claude`
 - `bedrock`
 
 ### Supported Prompts
-- `cot_multi_extract`
-- `cot_caption_multi_extract`
-- `cot_caption_explanation_multi_extract`
-- `cot_caption_explanation_deduction_multi_extract`
+
+- `cot_multi_extract` (default)
+- `cot_caption_multi_extract` (with guided visual perception)
+- `cot_caption_explanation_multi_extract` (with guided perception and inductive reasoning)
+- `cot_caption_explanation_deduction_multi_extract` (with guided perception, induction and deduction)
 
 ## API Setup
 
-Gemini Pro (multimodal): Please create a file named `gemini_vision_info.json`
+Please create a `.env` file in the root directory with the following content:
 
-```json
-{"engine": "gemini-pro-vision", "key": "your_api_key"}
 ```
-
-GPT-4V (multimodal): Please create a file named `openai_vision_info.json`
-
-```json
-{"engine": "gpt-4-vision-preview", "key": "your_api_key"}
+OPENAI_KEY=your_api_key
+GEMINI_KEY=your_api_key
+CLAUDE_KEY=your_api_key
 ```
 
 Claude 3 Opus (multimodal): Please create a file named `claude_info.json`
 
-```json
-{"engine": "claude-3-opus-20240229", "key": "your_api_key"}
 ```
-
-Claude 3.5 Sonnet (multimodal) via [Amazon Bedrock](https://aws.amazon.com/bedrock/claude/): Please create a file named `bedrock_info.json`
-
-> 💡 For more information on how to select a default AWS Region and setup AWS credentials, please refer to the [AWS Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html) (Developer Guide > Credentials).
-
-```json
-{"engine": "anthropic.claude-3-5-sonnet-20240620-v1:0"}
+{"engine": "claude-3-opus-20240229", "key": "your_api_key"}
 ```

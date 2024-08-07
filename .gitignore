@@ -4,4 +4,5 @@ outputs
 gemini_vision_info.json
 openai_vision_info.json
 claude_info.json
+.env
 .DS_store

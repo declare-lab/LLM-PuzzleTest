@@ -1,10 +1,12 @@
 import json
+import os
 import time
 import torch
 import anthropic
 import botocore
 import boto3
 from PIL import Image
+from dotenv import load_dotenv
 from fire import Fire
 from openai import OpenAI
 from pydantic import BaseModel
@@ -87,6 +89,26 @@ class GeminiVisionModel(GeminiModel):
     model_path = "gemini_vision_info.json"
 
 
+class GeminiProVisionModel(GeminiModel):
+    engine: str = "gemini-pro-vision"
+
+    def load(self):
+        if self.model is None:
+            load_dotenv()
+            genai.configure(api_key=os.environ["GEMINI_KEY"])
+            self.model = genai.GenerativeModel(self.engine)
+
+
+class GeminiProVisionNewModel(GeminiModel):
+    engine: str = "gemini-1.5-pro"
+
+    def load(self):
+        if self.model is None:
+            load_dotenv()
+            genai.configure(api_key=os.environ["GEMINI_KEY"])
+            self.model = genai.GenerativeModel(self.engine)
+
+
 class OpenAIModel(EvalModel):
     model_path: str = "openai_info.json"
     timeout: int = 60
@@ -101,9 +123,9 @@ class OpenAIModel(EvalModel):
 
     def make_messages(self, prompt: str, image: Image = None) -> List[dict]:
         inputs = [{"type": "text", "text": prompt}]
-        if image is not None and "vision" in self.engine:
+        if image is not None:
             image_text = convert_image_to_text(self.resize_image(image))
-            url = f"data:image/jpeg;base64,{image_text}"
+            url = f"data:image/png;base64,{image_text}"
             inputs.append({"type": "image_url", "image_url": {"url": url}})
 
         return [{"role": "user", "content": inputs}]
@@ -171,6 +193,26 @@ class OpenAIVisionModel(OpenAIModel):
     model_path = "openai_vision_info.json"
 
 
+class GPT4VModel(OpenAIModel):
+    engine: str = "gpt-4-vision-preview"
+
+    def load(self):
+        if self.client is None:
+            load_dotenv()
+            key = os.environ["OPENAI_KEY"]
+            self.client = OpenAI(api_key=key, timeout=self.timeout)
+
+
+class GPT4oModel(OpenAIModel):
+    engine: str = "gpt-4o-2024-05-13"
+
+    def load(self):
+        if self.client is None:
+            load_dotenv()
+            key = os.environ["OPENAI_KEY"]
+            self.client = OpenAI(api_key=key, timeout=self.timeout)
+
+
 class LlavaModel(EvalModel):
     model_path = "llava-hf/llava-1.5-13b-hf"
     template = "USER: <image>\n{prompt}\nASSISTANT:"
@@ -207,7 +249,7 @@ class ClaudeModel(EvalModel):
     model_path: str = "claude_info.json"
     timeout: int = 60
     engine: str = ""
-    client: Optional[OpenAI]
+    client: Optional[anthropic.Anthropic]
 
     def load(self):
         with open(self.model_path) as f:
@@ -258,6 +300,26 @@ class ClaudeModel(EvalModel):
                 print("ClaudeModel request failed, retrying.")
 
         return output
+
+
+class ClaudeOpusModel(ClaudeModel):
+    engine: str = "claude-3-opus-20240229"
+
+    def load(self):
+        if self.client is None:
+            load_dotenv()
+            key = os.environ["CLAUDE_KEY"]
+            self.client = anthropic.Anthropic(api_key=key, timeout=self.timeout)
+
+
+class ClaudeSonnetNewModel(ClaudeModel):
+    engine: str = "claude-3-5-sonnet-20240620"
+
+    def load(self):
+        if self.client is None:
+            load_dotenv()
+            key = os.environ["CLAUDE_KEY"]
+            self.client = anthropic.Anthropic(api_key=key, timeout=self.timeout)
 
 
 class QwenModel(EvalModel):
@@ -364,6 +426,12 @@ def select_model(model_name: str, **kwargs) -> EvalModel:
         llava=LlavaModel,
         claude=ClaudeModel,
         qwen=QwenModel,
+        gpt4v=GPT4VModel,
+        gpt4o=GPT4oModel,
+        claude_3_opus=ClaudeOpusModel,
+        claude_35_sonnet=ClaudeSonnetNewModel,
+        gemini_1_pro=GeminiProVisionModel,
+        gemini_15_pro=GeminiProVisionNewModel,
         bedrock=BedrockModel,
     )
     model_class = model_map.get(model_name)
@@ -381,6 +449,16 @@ def test_model(
     model = select_model(model_name, **kwargs)
     print(locals())
     print(model.run(prompt, load_image(image_path)))
+
+
+"""
+bash evaluate.sh gpt4v
+bash evaluate.sh claude_3_opus
+bash evaluate.sh gemini_1_pro
+bash evaluate.sh gpt4o
+bash evaluate.sh claude_35_sonnet
+bash evaluate.sh gemini_15_pro
+"""
 
 
 if __name__ == "__main__":

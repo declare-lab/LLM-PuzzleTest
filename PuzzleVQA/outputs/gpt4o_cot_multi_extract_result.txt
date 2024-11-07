@@ -1,0 +1,45 @@
+
+    Puzzle name: circle_size_number
+    Success rate: Success Rate: 48.0000%
+    
+    
+    Puzzle name: color_grid
+    Success rate: Success Rate: 56.0000%
+    
+    
+    Puzzle name: color_hexagon
+    Success rate: Success Rate: 92.0000%
+    
+    
+    Puzzle name: color_number_hexagon
+    Success rate: Success Rate: 45.0000%
+    
+    
+    Puzzle name: color_overlap_squares
+    Success rate: Success Rate: 68.0000%
+    
+    
+    Puzzle name: rectangle_height_color
+    Success rate: Success Rate: 48.0000%
+    
+    
+    Puzzle name: rectangle_height_number
+    Success rate: Success Rate: 31.0000%
+    
+    
+    Puzzle name: shape_morphs
+    Success rate: Success Rate: 27.0000%
+    
+    
+    Puzzle name: shape_reflect
+    Success rate: Success Rate: 87.0000%
+    
+    
+    Puzzle name: shape_size_grid
+    Success rate: Success Rate: 78.0000%
+    
+    
+    Puzzle name: triangle
+    Success rate: Success Rate: 98.0000%
+    
+    

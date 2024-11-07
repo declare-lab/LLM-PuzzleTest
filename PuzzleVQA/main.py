@@ -26,7 +26,7 @@ def evaluate_multi_choice(
     data_path: str,
     image_dir: str = "data",
     prompt_name: str = "cot_multi_extract",
-    output_dir: str = "outputs",
+    output_dir: str = "outputs_simple",
     prevent_direct_answer: bool = False,
     use_describe_image_prompt: bool = True,
     **kwargs,

@@ -29,6 +29,107 @@ def encode_image(image_path):
   with open(image_path, "rb") as image_file:
     return base64.b64encode(image_file.read()).decode('utf-8')
 
+def evaluate_multi_choice_sequential(
+    data_path: str,
+    image_dir: str = "data",
+    prompt_name: str = "cot_multi_extract",
+    output_dir: str = "outputs",
+    **kwargs,
+):
+    print(locals())
+    data = Data.load_with_image_dir(data_path, image_dir)
+    model_name = kwargs.get("model_name")
+    path_out = f"{output_dir}/{Path(data_path).stem}/{model_name}/{prompt_name}.jsonl"
+    print(dict(path_out=path_out))
+
+    is_correct = []
+    progress = tqdm(data.samples, desc=path_out)
+    scorer = ExactScorer()
+    prompter = select_prompter(prompt_name)
+    model = select_model(**kwargs)
+
+    for sample in progress:
+        image_path = f"data/{sample.image}"
+        base64_image = encode_image(image_path)
+
+        agent_contexts = [[], [], []]  
+        final_answer = None
+
+        # Agent 1: Visual Perception
+        visual_perception_prompt = f"""
+        You are responsible for visual perception. Below is the question and image. 
+        Describe only the visible patterns or layout from the image that might help answer the question. 
+        Do not provide logical inferences, only what you see.
+
+        Question: {sample.question}
+        Image (base64): "data:image/jpeg;base64,{base64_image}"
+        """
+
+        agent_contexts[0].append({"role": "user", "content": visual_perception_prompt})
+        completion_1 = mad.generate_answer(agent_contexts[0], model_name)
+        visual_response = mad.construct_assistant_message(completion_1)
+        agent_contexts[0].append(visual_response)
+
+        #print(f"Agent 1 (Visual Perception) Response:\n{visual_response['content']}\n")
+
+
+        # Agent 2: Inductive Reasoning
+        inductive_reasoning_prompt = f"""
+        Question: {sample.question}
+        Image (base64): "data:image/jpeg;base64,{base64_image}"
+
+        Visual perception: "{visual_response['content']}"
+        
+        Based on the visual perception provided, identify patterns, rules, or relationships that might explain the visual details and lead to answering the question.
+
+        """
+        agent_contexts[1].append({"role": "user", "content": inductive_reasoning_prompt})
+        completion_2 = mad.generate_answer(agent_contexts[1], model_name)
+        inductive_response = mad.construct_assistant_message(completion_2)
+        agent_contexts[1].append(inductive_response)
+
+        #print(f"Agent 2 (Inductive Reasoning) Response:\n{inductive_response['content']}\n")
+
+
+        # Agent 3: Deductive Reasoning
+        deductive_reasoning_prompt = f"""
+        Based on the following information:
+        1. Visual Perception: "{visual_response['content']}"
+        2. Inductive Reasoning: "{inductive_response['content']}"
+        3. Question: "{sample.question}"
+        4. Image (base64): "data:image/jpeg;base64,{base64_image}"
+
+        What is the final answer? State it explicitly at the end of your response.
+        Ensure the answer is based on the observed pattern or rule, and provide a clear and concise explanation.
+        """
+
+        agent_contexts[2].append({"role": "user", "content": deductive_reasoning_prompt})
+        completion_3 = mad.generate_answer(agent_contexts[2], model_name)
+        deductive_response = mad.construct_assistant_message(completion_3)
+        agent_contexts[2].append(deductive_response)
+
+        print(f"Agent 3 (Deductive Reasoning) Response:\n{deductive_response['content']}\n")
+
+        final_answer = prompter.get_answer(deductive_response['content'], sample.options)
+        sample.pred = final_answer
+        print("Final Answer:", final_answer)
+
+
+        correct = scorer.run(sample)
+        is_correct.append(correct)
+        score = sum(is_correct) / len(is_correct) if is_correct else 0
+
+
+        print(f"Correct: {correct}")
+        print(f"Accuracy so far: {score:.2%}\n")
+
+
+        progress.set_postfix(score=score)
+
+
+        data.save(path_out)
+
+
 def evaluate_multi_choice(
     data_path: str,
     image_dir: str = "data",
@@ -122,7 +223,6 @@ def evaluate_multi_choice(
         print(dict(is_correct=is_correct[-1]))
         data.save(path_out)
 
-
 def print_results(*paths: str):
     scorer = ExactScorer()
     mapping = dict(
@@ -193,3 +293,5 @@ python main.py print_results outputs/*/*/*.jsonl
 
 if __name__ == "__main__":
     Fire()
+
+

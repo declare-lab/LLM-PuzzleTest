@@ -60,8 +60,8 @@ def evaluate_multi_choice_sequential(
 
         # Agent 1: Visual Perception
         visual_perception_prompt = f"""
-        You are responsible for visual perception.
-        Given the question and the image, describe only the visible patterns or layout from the image that might help answer the question. 
+        You are responsible for visual perception. Below is the question and image. 
+        Describe only the visible patterns or layout from the image that might help answer the question. 
         Do not provide logical inferences, only what you see.
 
         Question: {sample.question}
@@ -94,10 +94,11 @@ def evaluate_multi_choice_sequential(
 
         # Agent 2: Inductive Reasoning
         inductive_reasoning_prompt = f"""
-        Question: {sample.question}
+        You are responsible for inductive inference.
         Visual perception: "{visual_response['content']}"
+        Based on the visual perception and image provided, identify patterns, rules, or relationships that might explain the visual details and lead to answering the question.
         
-        Based on the visual perception provided, identify patterns, rules, or relationships that might explain the visual details and lead to answering the question.
+        Question: {sample.question}
         """
 
         agent_contexts[1].append(
@@ -121,7 +122,7 @@ def evaluate_multi_choice_sequential(
         inductive_response = mad.construct_assistant_message(completion_2)
         agent_contexts[1].append(inductive_response)
 
-        print(f"Agent 2 (Inductive Reasoning) Response:\n{inductive_response['content']}\n")
+        # print(f"Agent 2 (Inductive Reasoning) Response:\n{inductive_response['content']}\n")
 
 
         # Agent 3: Deductive Reasoning
@@ -131,7 +132,7 @@ def evaluate_multi_choice_sequential(
         2. Inductive Reasoning: "{inductive_response['content']}"
         
         {sample.prompt}
-        Based on the patterns in 1. Visual Perception and in 2. Inductive Reasoning, the answer should be:
+        Based on the patterns in 1. Visual Perception and in 2. Inductive Reasoning and the provided image, the answer should be:
         Make sure to state your answer at the end of the response.
         """
 
@@ -160,6 +161,7 @@ def evaluate_multi_choice_sequential(
 
         final_answer = prompter.get_answer(deductive_response['content'], sample.options)
         sample.pred = final_answer
+        sample.raw_output = deductive_response['content']
         print("Final Answer:", final_answer)
 
         # fixed: scoring

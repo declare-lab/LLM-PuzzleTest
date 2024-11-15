@@ -33,7 +33,7 @@ def evaluate_multi_choice_sequential(
     data_path: str,
     image_dir: str = "data",
     prompt_name: str = "cot_multi_extract",
-    output_dir: str = "outputs",
+    output_dir: str = "outputs_sequential",
     **kwargs,
 ):
     print(locals())
@@ -44,11 +44,14 @@ def evaluate_multi_choice_sequential(
 
     is_correct = []
     progress = tqdm(data.samples, desc=path_out)
-    scorer = ExactScorer()
+    sample: Sample
     prompter = select_prompter(prompt_name)
+    scorer = ExactScorer()
     model = select_model(**kwargs)
 
     for sample in progress:
+        sample.prompt = prompter.base_prompter.run(sample)
+
         image_path = f"data/{sample.image}"
         base64_image = encode_image(image_path)
 
@@ -57,38 +60,68 @@ def evaluate_multi_choice_sequential(
 
         # Agent 1: Visual Perception
         visual_perception_prompt = f"""
-        You are responsible for visual perception. Below is the question and image. 
-        Describe only the visible patterns or layout from the image that might help answer the question. 
+        You are responsible for visual perception.
+        Given the question and the image, describe only the visible patterns or layout from the image that might help answer the question. 
         Do not provide logical inferences, only what you see.
 
         Question: {sample.question}
-        Image (base64): "data:image/jpeg;base64,{base64_image}"
         """
 
-        agent_contexts[0].append({"role": "user", "content": visual_perception_prompt})
+        # fixed: image input
+        agent_contexts[0].append(
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": visual_perception_prompt,
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url":  f"data:image/jpeg;base64,{base64_image}"
+                        },
+                    },
+                ],
+            },
+        )
         completion_1 = mad.generate_answer(agent_contexts[0], model_name)
         visual_response = mad.construct_assistant_message(completion_1)
         agent_contexts[0].append(visual_response)
 
-        #print(f"Agent 1 (Visual Perception) Response:\n{visual_response['content']}\n")
+        print(f"Agent 1 (Visual Perception) Response:\n{visual_response['content']}\n")
 
 
         # Agent 2: Inductive Reasoning
         inductive_reasoning_prompt = f"""
         Question: {sample.question}
-        Image (base64): "data:image/jpeg;base64,{base64_image}"
-
         Visual perception: "{visual_response['content']}"
         
         Based on the visual perception provided, identify patterns, rules, or relationships that might explain the visual details and lead to answering the question.
-
         """
-        agent_contexts[1].append({"role": "user", "content": inductive_reasoning_prompt})
+
+        agent_contexts[1].append(
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": inductive_reasoning_prompt,
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        },
+                    },
+                ],
+            },
+        )
         completion_2 = mad.generate_answer(agent_contexts[1], model_name)
         inductive_response = mad.construct_assistant_message(completion_2)
         agent_contexts[1].append(inductive_response)
 
-        #print(f"Agent 2 (Inductive Reasoning) Response:\n{inductive_response['content']}\n")
+        print(f"Agent 2 (Inductive Reasoning) Response:\n{inductive_response['content']}\n")
 
 
         # Agent 3: Deductive Reasoning
@@ -96,14 +129,29 @@ def evaluate_multi_choice_sequential(
         Based on the following information:
         1. Visual Perception: "{visual_response['content']}"
         2. Inductive Reasoning: "{inductive_response['content']}"
-        3. Question: "{sample.question}"
-        4. Image (base64): "data:image/jpeg;base64,{base64_image}"
-
-        What is the final answer? State it explicitly at the end of your response.
-        Ensure the answer is based on the observed pattern or rule, and provide a clear and concise explanation.
+        
+        {sample.prompt}
+        Based on the patterns in 1. Visual Perception and in 2. Inductive Reasoning, the answer should be:
+        Make sure to state your answer at the end of the response.
         """
 
-        agent_contexts[2].append({"role": "user", "content": deductive_reasoning_prompt})
+        agent_contexts[2].append(
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": deductive_reasoning_prompt,
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        },
+                    },
+                ],
+            },
+        )
         completion_3 = mad.generate_answer(agent_contexts[2], model_name)
         deductive_response = mad.construct_assistant_message(completion_3)
         agent_contexts[2].append(deductive_response)
@@ -114,19 +162,12 @@ def evaluate_multi_choice_sequential(
         sample.pred = final_answer
         print("Final Answer:", final_answer)
 
-
-        correct = scorer.run(sample)
-        is_correct.append(correct)
-        score = sum(is_correct) / len(is_correct) if is_correct else 0
-
-
-        print(f"Correct: {correct}")
-        print(f"Accuracy so far: {score:.2%}\n")
-
-
+        # fixed: scoring
+        is_correct.append(scorer.run(sample))
+        score = sum(is_correct) / len(is_correct)
         progress.set_postfix(score=score)
-
-
+        print(sample.json(indent=2, exclude={"image_string"}))
+        print(dict(is_correct=is_correct[-1]))
         data.save(path_out)
 
 
@@ -134,7 +175,7 @@ def evaluate_multi_choice(
     data_path: str,
     image_dir: str = "data",
     prompt_name: str = "cot_multi_extract",
-    output_dir: str = "outputs",
+    output_dir: str = "outputs_debate",
     prevent_direct_answer: bool = False,
     use_describe_image_prompt: bool = True,
     **kwargs,

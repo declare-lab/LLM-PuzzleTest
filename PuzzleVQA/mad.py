@@ -48,7 +48,7 @@ def generate_answer(answer_context, model):
             messages=answer_context,
             model="gpt-4o",
             max_tokens=1024,  # Adjust as needed
-            temperature=0.7
+            temperature=0.0
         )
     except Exception as e:
         print(f"Retrying due to an error: {e}")

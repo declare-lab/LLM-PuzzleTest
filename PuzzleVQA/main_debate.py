@@ -30,11 +30,11 @@ def encode_image(image_path):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 def evaluate_multi_choice_sequential(
-    data_path: str,
-    image_dir: str = "data",
-    prompt_name: str = "cot_multi_extract",
-    output_dir: str = "outputs_sequential",
-    **kwargs,
+        data_path: str,
+        image_dir: str = "data",
+        prompt_name: str = "cot_multi_extract",
+        output_dir: str = "outputs_sequential_2",
+        **kwargs,
 ):
     print(locals())
     data = Data.load_with_image_dir(data_path, image_dir)
@@ -54,54 +54,110 @@ def evaluate_multi_choice_sequential(
 
         image_path = f"data/{sample.image}"
         base64_image = encode_image(image_path)
+        example_image_1 = encode_image("data/images/rectangle_height_number/rectangle_height_number_0016.png")
+        example_image_2 = encode_image("data/images/size_cycle/size_cycle_0006.png")
 
-        agent_contexts = [[], [], []]  
+        agent_contexts = []
         final_answer = None
 
-        # Agent 1: Visual Perception
-        visual_perception_prompt = f"""
-        You are responsible for visual perception. Below is the question and image. 
-        Describe only the visible patterns or layout from the image that might help answer the question. 
-        Do not provide logical inferences, only what you see.
-
-        Question: {sample.question}
+        # Agent 1: Visual Perception (Attributes)
+        perception = f"""
+        You are an expert for visual perception agent in puzzle solving.
+        Explain how the objects are arranged and what shape they form, 
+        and describe all attributes [1.colors 2.numbers 3.sizes 4.shapes] of each objects.
+        An in-context example is given, and don't just repeat the example answer.
+        Do not provide logical inferences, describe only what you see.
+        
+        Let's think step by step.
         """
 
-        # fixed: image input
-        agent_contexts[0].append(
+        example_prompt_1 = f"""
+        Example 1
+        There are 7 rectangles in the image in a row. From left to right, the attributes are
+        1. colors: ['green', 'green', 'green', 'green', 'green', 'green', 'green']
+        2. numbers: ['3', '2', '1', '3', '2', '1', '?']
+        3. sizes: ['long', 'medium', 'short', 'long', 'medium', 'short', 'long']
+        4. shapes: ['rectangle', 'rectangle', 'rectangle', 'rectangle', 'rectangle', 'rectangle', 'rectangle']
+        """
+
+        example_prompt_2 = f"""
+        Example 2
+        There are circles arranged in a spiral with three arms. The attributes are
+        1. colors: ['yellow', 'yellow', 'yellow'], ['yellow', 'yellow', 'yellow'], ['yellow', 'yellow', 'yellow']
+        2. numbers: ['none', 'none', 'none'], ['none', 'none', 'none'], ['none', 'none', 'none']
+        3. sizes: ['small', '?', 'large'], ['small', 'medium', 'large'], ['small', 'medium', 'large']
+        4. shapes: ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle']
+        """
+
+        agent_contexts.append([
+    {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": perception,
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{example_image_2}"
+                        }
+                    },
+                ],
+            },
+            {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": example_prompt_2,
+                    },
+                ],
+            },
             {
                 "role": "user",
                 "content": [
                     {
                         "type": "text",
-                        "text": visual_perception_prompt,
+                        "text": "Now the given image is",
                     },
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url":  f"data:image/jpeg;base64,{base64_image}"
-                        },
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        }
                     },
                 ],
             },
-        )
+        ])
         completion_1 = mad.generate_answer(agent_contexts[0], model_name)
-        visual_response = mad.construct_assistant_message(completion_1)
-        agent_contexts[0].append(visual_response)
+        visual_response_1 = mad.construct_assistant_message(completion_1)
+        agent_contexts[0].append(visual_response_1)
 
-        print(f"Agent 1 (Visual Perception) Response:\n{visual_response['content']}\n")
-
+        print(f"Agent 1 (Visual Perception) Response:\n{visual_response_1['content']}\n")
 
         # Agent 2: Inductive Reasoning
         inductive_reasoning_prompt = f"""
-        You are responsible for inductive inference.
-        Visual perception: "{visual_response['content']}"
-        Based on the visual perception and image provided, identify patterns, rules, or relationships that might explain the visual details and lead to answering the question.
+        You are an expert in pattern analysis. 
+        Based on the visual perception and the image,
+        your task is to observe and analyze the given patterns of attributes in the image to extract any rules or relationships present.
+        Do not determine the correct answer. Simply identify and describe the pattern.
+
+        Visual Perception: {visual_response_1['content']}
         
-        Question: {sample.question}
+        Output format:
+        - Observed Pattern: Focus on attributes that differ in each object.
+        - Hypothesis: State a general rule that explains the observed pattern.
+        
+        Let's think step by step.
         """
 
-        agent_contexts[1].append(
+        agent_contexts.append([
             {
                 "role": "user",
                 "content": [
@@ -116,28 +172,29 @@ def evaluate_multi_choice_sequential(
                         },
                     },
                 ],
-            },
+            },]
         )
         completion_2 = mad.generate_answer(agent_contexts[1], model_name)
         inductive_response = mad.construct_assistant_message(completion_2)
         agent_contexts[1].append(inductive_response)
 
-        # print(f"Agent 2 (Inductive Reasoning) Response:\n{inductive_response['content']}\n")
-
+        print(f"Agent 2 (Inductive Reasoning) Response:\n{inductive_response['content']}\n")
 
         # Agent 3: Deductive Reasoning
         deductive_reasoning_prompt = f"""
-        Based on the following information:
-        1. Visual Perception: "{visual_response['content']}"
-        2. Inductive Reasoning: "{inductive_response['content']}"
+        You are a deductive reasoning expert. 
+
+        Visual Perception: {visual_response_1['content']}
+        Inductive Reasoning: {inductive_response['content']}
+        Question: {sample.prompt}
         
-        {sample.prompt}
         Based on the patterns in 1. Visual Perception and in 2. Inductive Reasoning and the provided image, the answer should be:
         Make sure to state your answer at the end of the response.
+        Let's think step by step.
         """
 
-        agent_contexts[2].append(
-            {
+        agent_contexts.append(
+            [{
                 "role": "user",
                 "content": [
                     {
@@ -152,6 +209,7 @@ def evaluate_multi_choice_sequential(
                     },
                 ],
             },
+            ]
         )
         completion_3 = mad.generate_answer(agent_contexts[2], model_name)
         deductive_response = mad.construct_assistant_message(completion_3)
@@ -173,6 +231,7 @@ def evaluate_multi_choice_sequential(
         data.save(path_out)
 
 
+# Multi agent debate framework (Simultaneous)
 def evaluate_multi_choice(
     data_path: str,
     image_dir: str = "data",

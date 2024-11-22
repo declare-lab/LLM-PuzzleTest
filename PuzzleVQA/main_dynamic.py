@@ -11,6 +11,7 @@ from prompting import select_prompter
 
 import mad
 import base64
+import re
 
 
 class Scorer(BaseModel):
@@ -32,11 +33,17 @@ def encode_image(image_path):
 
 
 def get_attributes(base64_image, model_name):
+
     prompt = f"""
     You are an attribute analysis agent. 
     Given a puzzle image, your task is to identify which attribute changes in the given image.
     Your choices are among [1. colors, 2. numbers, 3. sizes, 4. shapes]. Number of answers can be 1 or 2.
-    Only return the index of choices. (Example: 3 / Example: 2, 3)
+    - color: is colors of the objects are not consistent?
+    - number: is there numbers written in each object?
+    - sizes: short, medium, tall or small, medium, large
+    - shape: is shapes of the objects are not consistent?
+    Make sure to return the index of choices at the end of your response. (Example: Choices: 3 / Choices: 2, 3)
+    Pay particular attention to the size. Let's think step by step.
     """
 
     message = [
@@ -56,9 +63,11 @@ def get_attributes(base64_image, model_name):
             ],
         },
     ]
-    completion_2 = mad.generate_answer(message, model_name)
-    answer = mad.construct_assistant_message(completion_2)
+
+    completion = mad.generate_answer(message, model_name)
+    answer = mad.construct_assistant_message(completion)
     message.append(answer)
+    print("Attribute agent: ", answer)
 
     attribute_mapping = {
         '1': 'colors',
@@ -66,88 +75,48 @@ def get_attributes(base64_image, model_name):
         '3': 'sizes',
         '4': 'shapes'
     }
-    # Split the GPT output by commas and strip whitespace
-    numbers = answer.split(',')
-    numbers = [num.strip() for num in numbers]
-
-    # Map each number to its corresponding attribute name
-    attributes = [attribute_mapping[num] for num in numbers if num in attribute_mapping]
-    print(f"Varying attributes:\n{attributes}\n")
-
-    return attributes
-
-
-def single_agent(model_name, sample, prompter, model):
-    if "qwen" in model_name:
-        image = sample.image
+    # Extract the "Choices:" part using regex
+    match = re.search(r"Choices:\s*([\d, ]+)", answer['content'])
+    if match:
+        # Get the extracted numbers and split into a list
+        numbers = match.group(1).split(',')
+        # Map the numbers to their corresponding attributes
+        attributes = [attribute_mapping[num.strip()] for num in numbers if num.strip() in attribute_mapping]
+        print(f"Varying attributes:\n{attributes}\n")
+        return attributes
     else:
-        image = convert_text_to_image(sample.image_string)
-
-    raw_output = model.run(sample.prompt, image)
-    pred = prompter.get_answer(sample.raw_output, sample.options)
-    return pred, raw_output
+        print("No valid attributes found.")
+        return []
 
 
-def sequential_reasoning(base64_image, model_name, sample, prompter):
+def sequential_reasoning(base64_image, model_name, sample, prompter, attributes):
     agent_contexts = []
-    example_image_2 = encode_image("data/images/size_cycle/size_cycle_0006.png")
+    example_image_1 = encode_image("data/images/rectangle_height_number/rectangle_height_number_0016.png")
 
     # Agent 1: Visual Perception
     perception = f"""
-    You are an expert for visual perception agent in puzzle solving.
+    You are an expert for visual perception in puzzle solving.
     Explain how the objects are arranged and what shape they form, 
-    and describe all attributes [1.colors 2.numbers 3.sizes 4.shapes] of each objects.
-    An in-context example is given, and don't just repeat the example answer.
+    and describe how attributes 1.{attributes[0]} 2.{attributes[1]} are changing for each objects for the given image.
     Do not provide logical inferences, describe only what you see.
 
     Let's think step by step.
     """
 
-    example_prompt_2 = f"""
-    Example
-    There are circles arranged in a spiral with three arms. The attributes are
-    1. colors: ['yellow', 'yellow', 'yellow'], ['yellow', 'yellow', 'yellow'], ['yellow', 'yellow', 'yellow']
-    2. numbers: ['none', 'none', 'none'], ['none', 'none', 'none'], ['none', 'none', 'none']
-    3. sizes: ['small', '?', 'large'], ['small', 'medium', 'large'], ['small', 'medium', 'large']
-    4. shapes: ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle']
+    example_prompt_1 = f"""
+    Example 1
+    There are 7 rectangles in the image in a row. From left to right, the attributes numbers and sizes are
+    numbers: ['3', '2', '1', '3', '2', '1', '?']
+    sizes: ['long', 'medium', 'short', 'long', 'medium', 'short', 'long']
     """
 
     agent_contexts.append([
         {
-            "role": "system",
-            "content": [
-                {
-                    "type": "text",
-                    "text": perception,
-                }
-            ],
-        },
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{example_image_2}"
-                    }
-                },
-            ],
-        },
-        {
-            "role": "assistant",
-            "content": [
-                {
-                    "type": "text",
-                    "text": example_prompt_2,
-                },
-            ],
-        },
-        {
             "role": "user",
             "content": [
                 {
                     "type": "text",
-                    "text": "Now the given image is",
+                    "text": perception
                 },
                 {
                     "type": "image_url",
@@ -166,19 +135,13 @@ def sequential_reasoning(base64_image, model_name, sample, prompter):
 
     # Agent 2: Inductive Reasoning
     inductive_reasoning_prompt = f"""
-            You are an expert in pattern analysis. 
-            Based on the visual perception and the image,
-            your task is to observe and analyze the given patterns of attributes in the image to extract any rules or relationships present.
-            Do not determine the correct answer. Simply identify and describe the pattern.
+    You are an inductive reasoning agent.
+    Based on the visual perception and the image, analyze the pattern of attributes in the image.
 
-            Visual Perception: {visual_response_1['content']}
-
-            Output format:
-            - Observed Pattern: Focus on attributes that differ in each object.
-            - Hypothesis: State a general rule that explains the observed pattern.
-
-            Let's think step by step.
-            """
+    Visual Perception: {visual_response_1['content']}
+    Inductive Reasoning:
+    Let's think step by step.
+    """
 
     agent_contexts.append([
         {
@@ -205,16 +168,14 @@ def sequential_reasoning(base64_image, model_name, sample, prompter):
 
     # Agent 3: Deductive Reasoning
     deductive_reasoning_prompt = f"""
-            You are a deductive reasoning expert. 
+    1. Visual Perception: {visual_response_1['content']}
+    2. Inductive Reasoning: {inductive_response['content']}
+    Question: {sample.prompt}
 
-            Visual Perception: {visual_response_1['content']}
-            Inductive Reasoning: {inductive_response['content']}
-            Question: {sample.prompt}
-
-            Based on the patterns in 1. Visual Perception and in 2. Inductive Reasoning and the provided image, the answer should be:
-            Make sure to state your answer at the end of the response.
-            Let's think step by step.
-            """
+    Based on the patterns in 1. Visual Perception and in 2. Inductive Reasoning and the provided image, the answer should be:
+    Make sure to state your answer at the end of the response.
+    Let's think step by step.
+    """
 
     agent_contexts.append(
         [{
@@ -252,7 +213,9 @@ def evaluate_multi_choice(
         data_path: str,
         image_dir: str = "data",
         prompt_name: str = "cot_multi_extract",
-        output_dir: str = "outputs_sequential_2",
+        output_dir: str = "outputs_dynamic",
+        prevent_direct_answer: bool = False,
+        use_describe_image_prompt: bool = True,
         **kwargs,
 ):
     print(locals())
@@ -268,6 +231,11 @@ def evaluate_multi_choice(
     scorer = ExactScorer()
     model = select_model(**kwargs)
 
+    if not prevent_direct_answer:
+        prompter.base_prompter.prevent_direct_answer = False
+    if not use_describe_image_prompt:
+        prompter.base_prompter.use_describe_image_prompt = False
+
     for sample in progress:
         sample.prompt = prompter.base_prompter.run(sample)
 
@@ -278,12 +246,25 @@ def evaluate_multi_choice(
         # Number of attributes
         attributes = get_attributes(base64_image, model_name)
 
-
         # Dynamic
-        if len(attributes) == 1:
-            sample.pred, sample.raw_output = single_agent(model_name, sample, prompter, model)
-        else:
-            sample.pred, sample.raw_output = sequential_reasoning(base64_image, model_name, sample, prompter)
+        if len(attributes) == 1:  # single agent
+            if "qwen" in model_name:
+                image = sample.image
+            else:
+                image = convert_text_to_image(sample.image_string)
+            single_prompt = f"""{sample.prompt} Derive answer by focusing on the pattern of {attributes[0]} in the image."""
+            sample.prompt = single_prompt
+            sample.raw_output = model.run(sample.prompt, image)
+            sample.pred = prompter.get_answer(sample.raw_output, sample.options)
+
+            # Model-based extraction if prediction not valid
+            if sample.pred not in sample.options:
+                sample.prompt = prompter.run(sample)
+                sample.raw_output = model.run(sample.prompt, image)
+                sample.pred = prompter.get_answer(sample.raw_output, sample.options)
+
+        else:  # multi agent (sequential reasoning)
+            sample.pred, sample.raw_output = sequential_reasoning(base64_image, model_name, sample, prompter, attributes)
 
 
         # fixed: scoring

@@ -54,40 +54,27 @@ def evaluate_multi_choice_sequential(
 
         image_path = f"data/{sample.image}"
         base64_image = encode_image(image_path)
-        example_image_1 = encode_image("data/images/rectangle_height_number/rectangle_height_number_0016.png")
-        example_image_2 = encode_image("data/images/size_cycle/size_cycle_0006.png")
+        # example_image_1 = encode_image("data/images/rectangle_height_number/rectangle_height_number_0016.png")
 
         agent_contexts = []
         final_answer = None
 
-        # Agent 1: Visual Perception (Attributes)
+        # Agent 1: Visual Perception
         perception = f"""
-        You are an expert for visual perception agent in puzzle solving.
+        You are an expert for visual perception in puzzle solving.
         Explain how the objects are arranged and what shape they form, 
-        and describe all attributes [1.colors 2.numbers 3.sizes 4.shapes] of each objects.
-        An in-context example is given, and don't just repeat the example answer.
+        and describe how attributes [1.colors 2.numbers 3.sizes 4.shapes] are changing for each objects.
         Do not provide logical inferences, describe only what you see.
         
         Let's think step by step.
         """
 
-        example_prompt_1 = f"""
-        Example 1
-        There are 7 rectangles in the image in a row. From left to right, the attributes are
-        1. colors: ['green', 'green', 'green', 'green', 'green', 'green', 'green']
-        2. numbers: ['3', '2', '1', '3', '2', '1', '?']
-        3. sizes: ['long', 'medium', 'short', 'long', 'medium', 'short', 'long']
-        4. shapes: ['rectangle', 'rectangle', 'rectangle', 'rectangle', 'rectangle', 'rectangle', 'rectangle']
-        """
-
-        example_prompt_2 = f"""
-        Example 2
-        There are circles arranged in a spiral with three arms. The attributes are
-        1. colors: ['yellow', 'yellow', 'yellow'], ['yellow', 'yellow', 'yellow'], ['yellow', 'yellow', 'yellow']
-        2. numbers: ['none', 'none', 'none'], ['none', 'none', 'none'], ['none', 'none', 'none']
-        3. sizes: ['small', '?', 'large'], ['small', 'medium', 'large'], ['small', 'medium', 'large']
-        4. shapes: ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle']
-        """
+        # example_prompt_1 = f"""
+        # Example 1
+        # There are 7 rectangles in the image in a row. From left to right, the attributes numbers and sizes are
+        # numbers: ['3', '2', '1', '3', '2', '1', '?']
+        # sizes: ['long', 'medium', 'short', 'long', 'medium', 'short', 'long']
+        # """
 
         agent_contexts.append([
     {
@@ -99,26 +86,26 @@ def evaluate_multi_choice_sequential(
                     }
                 ],
             },
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{example_image_2}"
-                        }
-                    },
-                ],
-            },
-            {
-                "role": "assistant",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": example_prompt_2,
-                    },
-                ],
-            },
+            # {
+            #     "role": "user",
+            #     "content": [
+            #         {
+            #             "type": "image_url",
+            #             "image_url": {
+            #                 "url": f"data:image/jpeg;base64,{example_image_1}"
+            #             }
+            #         },
+            #     ],
+            # },
+            # {
+            #     "role": "assistant",
+            #     "content": [
+            #         {
+            #             "type": "text",
+            #             "text": example_prompt_1,
+            #         },
+            #     ],
+            # },
             {
                 "role": "user",
                 "content": [
@@ -143,17 +130,11 @@ def evaluate_multi_choice_sequential(
 
         # Agent 2: Inductive Reasoning
         inductive_reasoning_prompt = f"""
-        You are an expert in pattern analysis. 
-        Based on the visual perception and the image,
-        your task is to observe and analyze the given patterns of attributes in the image to extract any rules or relationships present.
-        Do not determine the correct answer. Simply identify and describe the pattern.
+        You are an inductive reasoning agent.
+        Based on the visual perception and the image, analyze the pattern of attributes in the image.
 
         Visual Perception: {visual_response_1['content']}
-        
-        Output format:
-        - Observed Pattern: Focus on attributes that differ in each object.
-        - Hypothesis: State a general rule that explains the observed pattern.
-        
+        Inductive Reasoning:
         Let's think step by step.
         """
 
@@ -182,12 +163,10 @@ def evaluate_multi_choice_sequential(
 
         # Agent 3: Deductive Reasoning
         deductive_reasoning_prompt = f"""
-        You are a deductive reasoning expert. 
-
-        Visual Perception: {visual_response_1['content']}
-        Inductive Reasoning: {inductive_response['content']}
+        1. Visual Perception: {visual_response_1['content']}
+        2. Inductive Reasoning: {inductive_response['content']}
         Question: {sample.prompt}
-        
+
         Based on the patterns in 1. Visual Perception and in 2. Inductive Reasoning and the provided image, the answer should be:
         Make sure to state your answer at the end of the response.
         Let's think step by step.

@@ -7,6 +7,7 @@ from tqdm import tqdm
 from data_loading import Data, Sample, convert_text_to_image
 from modeling import select_model
 from prompting import select_prompter
+from python_executor import PythonExecutor, extract_program
 
 
 class Scorer(BaseModel):
@@ -54,11 +55,25 @@ def evaluate_multi_choice(
     if not use_describe_image_prompt:
         prompter.base_prompter.use_describe_image_prompt = False
 
+    if "pot" in prompt_name:
+        executor = PythonExecutor(get_answer_from_stdout=True)
+
     for sample in progress:
         # Initial zero-shot prompting
         sample.prompt = prompter.base_prompter.run(sample)
+        print(f"sample.prompt: {sample.prompt}")
         image = convert_text_to_image(sample.image_string)
         sample.raw_output = model.run(sample.prompt, image)
+        print(f"sample.raw_output: {sample.raw_output}")
+
+        if "pot" in prompt_name:
+            program = extract_program(sample.raw_output)
+            prediction = executor.apply(program)
+            sample.raw_output += f"\nProgram Output: {prediction[0]}\n"
+            print("start" + "#" * 100)
+            print(sample.raw_output)
+            print("end" + "#" * 100)
+
         sample.pred = prompter.get_answer(sample.raw_output, sample.options)
 
         # Model-based extraction if prediction not valid

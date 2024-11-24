@@ -11,7 +11,13 @@ from pydantic import BaseModel
 from typing import Optional, List
 import google.generativeai as genai
 from data_loading import convert_image_to_text, convert_image_to_bytes, load_image
-from transformers import AutoProcessor, LlavaForConditionalGeneration, LlavaProcessor
+from transformers import (
+    AutoProcessor,
+    LlavaForConditionalGeneration,
+    LlavaProcessor,
+    Qwen2VLForConditionalGeneration,
+)
+from openai import AzureOpenAI
 
 
 class EvalModel(BaseModel, arbitrary_types_allowed=True):
@@ -262,7 +268,7 @@ class BedrockModel(EvalModel):
         with open(self.model_path) as f:
             info = json.load(f)
             self.engine = info["engine"]
-            self.client = boto3.client('bedrock-runtime')
+            self.client = boto3.client("bedrock-runtime")
 
     def make_messages(self, prompt: str, image: Image = None) -> List[dict]:
         image_media_type = "png"
@@ -270,16 +276,9 @@ class BedrockModel(EvalModel):
 
         inputs = [
             {
-                "image": {
-                    "format": image_media_type,
-                    "source": {
-                        "bytes": image_data
-                    }
-                },
+                "image": {"format": image_media_type, "source": {"bytes": image_data}},
             },
-            {
-                "text": prompt
-            },
+            {"text": prompt},
         ]
 
         return [{"role": "user", "content": inputs}]
@@ -294,12 +293,9 @@ class BedrockModel(EvalModel):
                 response = self.client.converse(
                     modelId=self.engine,
                     messages=self.make_messages(prompt, image),
-                    inferenceConfig={
-                        "temperature": self.temperature,
-                        "maxTokens": 512
-                    }
+                    inferenceConfig={"temperature": self.temperature, "maxTokens": 512},
                 )
-                output = response['output']['message']['content'][0]['text']
+                output = response["output"]["message"]["content"][0]["text"]
             except Exception as e:
                 raise e
                 if error_message in str(e):
@@ -311,6 +307,222 @@ class BedrockModel(EvalModel):
         return output
 
 
+class GPT4vModel(EvalModel):
+    model_path: str = "gpt4v.json"
+    timeout: int = 60
+    engine: str = ""
+    client: Optional[OpenAI]
+
+    def load(self):
+        with open(self.model_path) as f:
+            info = json.load(f)
+            self.engine = info["engine"]
+            self.client = AzureOpenAI(
+                azure_endpoint=info["endpoint"],
+                api_key=info["key"],
+                api_version="2024-02-15-preview",
+            )
+
+    def make_messages(self, prompt: str, image: Image = None) -> List[dict]:
+        inputs = [{"type": "text", "text": prompt}]
+        if image is not None and "vision" in self.engine:
+            image_text = convert_image_to_text(self.resize_image(image))
+            url = f"data:image/jpeg;base64,{image_text}"
+            inputs.append({"type": "image_url", "image_url": {"url": url}})
+
+        return [{"role": "user", "content": inputs}]
+
+    def run(self, prompt: str, image: Image = None) -> str:
+        self.load()
+        output = ""
+        error_message = "The response was filtered"
+
+        while not output:
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.engine,
+                    messages=self.make_messages(prompt, image),
+                    temperature=self.temperature,
+                    max_tokens=512,
+                )
+                if response.choices[0].finish_reason == "content_filter":
+                    raise ValueError(error_message)
+                output = response.choices[0].message.content
+
+            except Exception as e:
+                print(e)
+                if error_message in str(e):
+                    output = error_message
+
+            if not output:
+                print("OpenAIModel request failed, retrying.")
+
+        return output
+
+    def run_few_shot(self, prompts: List[str], images: List[Image.Image]) -> str:
+        self.load()
+        output = ""
+        error_message = "The response was filtered"
+        content = []
+        for i, p in enumerate(prompts):
+            for value in self.make_messages(p, images[i])[0]["content"]:
+                content.append(value)
+
+        while not output:
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.engine,
+                    messages=[{"role": "user", "content": content}],
+                    temperature=self.temperature,
+                    max_tokens=512,
+                )
+                if response.choices[0].finish_reason == "content_filter":
+                    raise ValueError(error_message)
+                output = response.choices[0].message.content
+
+            except Exception as e:
+                print(e)
+                if error_message in str(e):
+                    output = error_message
+
+            if not output:
+                print("OpenAIModel request failed, retrying.")
+
+        return output
+
+
+class GPT4oModel(EvalModel):
+    model_path: str = "gpt4o.json"
+    timeout: int = 60
+    engine: str = ""
+    client: Optional[OpenAI]
+
+    def load(self):
+        with open(self.model_path) as f:
+            info = json.load(f)
+            self.engine = info["engine"]
+            self.client = AzureOpenAI(
+                azure_endpoint=info["endpoint"],
+                api_key=info["key"],
+                api_version="2024-02-15-preview",
+            )
+
+    def make_messages(self, prompt: str, image: Image = None) -> List[dict]:
+        inputs = [{"type": "text", "text": prompt}]
+        if image is not None and "vision" in self.engine:
+            image_text = convert_image_to_text(self.resize_image(image))
+            url = f"data:image/jpeg;base64,{image_text}"
+            inputs.append({"type": "image_url", "image_url": {"url": url}})
+
+        return [{"role": "user", "content": inputs}]
+
+    def run(self, prompt: str, image: Image = None) -> str:
+        self.load()
+        output = ""
+        error_message = "The response was filtered"
+
+        while not output:
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.engine,
+                    messages=self.make_messages(prompt, image),
+                    temperature=self.temperature,
+                    max_tokens=512,
+                )
+                if response.choices[0].finish_reason == "content_filter":
+                    raise ValueError(error_message)
+                output = response.choices[0].message.content
+
+            except Exception as e:
+                print(e)
+                if error_message in str(e):
+                    output = error_message
+
+            if not output:
+                print("OpenAIModel request failed, retrying.")
+
+        return output
+
+    def run_few_shot(self, prompts: List[str], images: List[Image.Image]) -> str:
+        self.load()
+        output = ""
+        error_message = "The response was filtered"
+        content = []
+        for i, p in enumerate(prompts):
+            for value in self.make_messages(p, images[i])[0]["content"]:
+                content.append(value)
+
+        while not output:
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.engine,
+                    messages=[{"role": "user", "content": content}],
+                    temperature=self.temperature,
+                    max_tokens=512,
+                )
+                if response.choices[0].finish_reason == "content_filter":
+                    raise ValueError(error_message)
+                output = response.choices[0].message.content
+
+            except Exception as e:
+                print(e)
+                if error_message in str(e):
+                    output = error_message
+
+            if not output:
+                print("OpenAIModel request failed, retrying.")
+
+        return output
+
+
+class Qwen2VLModel(EvalModel):
+    model_path = "Qwen/Qwen2-VL-7B-Instruct"
+    device: str = "cuda"
+    dtype: torch.dtype = torch.float16
+    model: Optional[Qwen2VLForConditionalGeneration] = None
+    processor: Optional[AutoProcessor] = None
+
+    def load(self):
+        if self.model is None:
+            self.model = Qwen2VLForConditionalGeneration.from_pretrained(
+                self.model_path,
+                torch_dtype=self.dtype,
+            ).to(self.device)
+            self.processor = AutoProcessor.from_pretrained(self.model_path)
+
+    def run(self, prompt: str, image: Image = None) -> str:
+        self.load()
+
+        conversation = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                    },
+                    {"type": "text", "text": prompt},
+                ],
+            }
+        ]
+
+        # Preprocess the inputs
+        prompt = self.processor.apply_chat_template(
+            conversation, add_generation_prompt=True
+        )
+
+        if image is not None:
+            image = self.resize_image(image)
+
+        # noinspection PyTypeChecker
+        inputs = self.processor(
+            text=[prompt], images=[image], padding=True, return_tensors="pt"
+        ).to(self.device, self.dtype)
+        prompt_length = inputs["input_ids"].shape[1]
+
+        outputs = self.model.generate(**inputs, max_new_tokens=512, do_sample=False)[0]
+        return self.processor.decode(outputs[prompt_length:], skip_special_tokens=True)
+
+
 def select_model(model_name: str, **kwargs) -> EvalModel:
     model_map = dict(
         gemini_vision=GeminiVisionModel,
@@ -318,6 +530,9 @@ def select_model(model_name: str, **kwargs) -> EvalModel:
         llava=LlavaModel,
         claude=ClaudeModel,
         bedrock=BedrockModel,
+        gpt4v=GPT4vModel,
+        gpt4o=GPT4oModel,
+        qwen2vl=Qwen2VLModel,
     )
     model_class = model_map.get(model_name)
     if model_class is None:

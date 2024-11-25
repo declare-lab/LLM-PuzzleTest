@@ -33,14 +33,16 @@ single_command = (
     "--prompt_name cot_multi_extract "
 )
 
+
+
 # 순차적으로 명령어 실행
 for dataset in datasets:
     command = single_command.format(dataset=dataset)
     print(f"Running: {command}")
     os.system(command)  # 실제 명령어 실행
 
-# # 순차적으로 명령어 실행
-# for dataset in datasets:
-#     command = sequential_command.format(dataset=dataset)
-#     print(f"Running: {command}")
-#     os.system(command)  # 실제 명령어 실행
+# 순차적으로 명령어 실행
+for dataset in datasets:
+    command = sequential_command.format(dataset=dataset)
+    print(f"Running: {command}")
+    os.system(command)  # 실제 명령어 실행

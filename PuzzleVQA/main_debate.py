@@ -330,7 +330,8 @@ def print_results(*paths: str):
 
 
 """
-python main.py print_results outputs/*/*/*.jsonl
+python main.py print_results outputs/*/*/*.jsonl #Linux
+python main_debate.py print_results (Get-ChildItem outputs_sequential\*\*\*.jsonl).FullName #Window
 """
 
 

@@ -1,5 +1,8 @@
 # Multimodal Puzzle Reasoning with LLMs
 
+> 🧗 We present a holistic performance of GPT-[n] and o-[n] models on PuzzleVQA and AlgoPuzzleVQA across both Open-Ended and Multiple-Choice settings.
+[Paper](https://arxiv.org/abs/2502.01081)
+
 > 🔥 PuzzleVQA, our new dataset reveals serious challenges of multimodal LLMs in understanding simple abstract patterns.
 [Paper](https://arxiv.org/abs/2403.13315) | [Website](https://puzzlevqa.github.io/)
 
@@ -14,24 +17,72 @@ We are excited to announce the release of two novel VQA datasets centered around
 The performance of MLLMs on both datasets is notably deficient, underscoring the pressing need for substantial enhancements in their multimodal reasoning capabilities.
 
 
-## PuzzleVQA
+# Tracking Performance in GPT-[N] and o-[N] Models
+
+![](/img/tracking.png)
+
+## Environment Setup
+
+```
+conda create -n puzzle-eval python=3.10 -y
+conda activate puzzle-eval
+pip install -r requirements.txt
+```
+
+## API Setup
+
+GPT-4-Turbo: Please create a file named `gpt4t.json`
+
+```json
+{"engine": "gpt-4-turbo", "key": "<API_KEY>", "location": "westus", "endpoint": "<ENDPOINT>", "api_version": "2024-08-01-preview"}
+```
+
+GPT-4o: Please create a file named `gpt4o.json`
+
+```json
+{"engine": "GPT4o", "key": "<API_KEY>", "location": "westus", "endpoint": "<ENDPOINT>", "api_version":"2024-08-01-preview"}
+```
+
+o1: Please create a file named `o1-full-high.json`
+
+```json
+{"engine": "o1-full", "reasoning_effort": "high", "key": "<API_KEY>", "location": "westus", "endpoint": "<ENDPOINT>", "api_version": "2024-12-01-preview"}
+```
+
+
+## Model Evaluation
+
+Our code currently supports inference with Azure OpenAI. 
+The supported model names are `[gpt4t, gpt4o, o1]`.
+
+### Open-Ended Setting
+```bash
+# Run evaluation on the "color_hexagon" puzzle in PuzzleVQA with o1
+python main.py evaluate --dataset PuzzleVQA --puzzle color_hexagon --question_type open --model_name o1 --output_dir outputs
+
+# Run evaluation on the "wheel_of_fortune" puzzle in AlgoPuzzleVQA with gpt4o
+python main.py evaluate --dataset AlgoPuzzleVQA --puzzle wheel_of_fortune --question_type open --model_name gpt4o --output_dir outputs
+```
+
+### Multiple-Choice Setting
+```bash
+# Run evaluation on the "shape_reflect" puzzle in PuzzleVQA with o1
+python main.py evaluate --dataset PuzzleVQA --puzzle shape_reflect --question_type mcq --model_name gpt4t --output_dir outputs
+
+# Run evaluation on the "board_tile" puzzle in AlgoPuzzleVQA with gpt4o
+python main.py evaluate --dataset AlgoPuzzleVQA --puzzle board_tile --question_type mcq --model_name o1 --output_dir outputs
+```
+
+
+# PuzzleVQA
 
 Large multimodal models extend the impressive capabilities of large language models by integrating multimodal understanding abilities. However, it is not clear how they can emulate the general intelligence and reasoning ability of humans. As recognizing patterns and abstracting concepts are key to general intelligence, we introduce PuzzleVQA, a collection of puzzles based on abstract patterns. With this dataset, we evaluate large multimodal models with abstract patterns based on fundamental concepts, including colors, numbers, sizes, and shapes. Through our experiments on state-of-the-art large multimodal models, we find that they are not able to generalize well to simple abstract patterns. Notably, even GPT-4V cannot solve more than half of the puzzles. To diagnose the reasoning challenges in large multimodal models, we progressively guide the models with our ground truth reasoning explanations for visual perception, inductive reasoning, and deductive reasoning. Our systematic analysis finds that the main bottlenecks of GPT-4V are weaker visual perception and inductive reasoning abilities. Through this work, we hope to shed light on the limitations of large multimodal models and how they can better emulate human cognitive processes in the future.
 
-### Daaset
+## Dataset
 
 PuzzleVQA is available [here](https://github.com/declare-lab/LLM-PuzzleTest/tree/master/PuzzleVQA/data) and also on [Huggingface](https://huggingface.co/datasets/declare-lab/PuzzleVQA).
 
-### Example Puzzle
-
-The figure below shows an example question which involves the color concept in PuzzleVQA, and an incorrect answer from
-GPT-4V. There are generally three stages that can be observed in the solving process: visual perception (blue),
-inductive reasoning (green), and deductive reasoning (red). Here, the visual perception was incomplete, causing a
-mistake during deductive reasoning.
-
-<img src="/img/example.png" alt="" width="600" height="1000">
-
-### Puzzle Components
+## Puzzle Components
 
 The figure below shows an illustration example of components (top) and reasoning explanations (bottom) for abstract
 puzzles in PuzzleVQA. To construct each puzzle instance, we first define the layout and pattern of a multimodal
@@ -41,7 +92,7 @@ truth reasoning explanations to interpret the puzzle and explain the general sol
 
 ![](/img/components.png)
 
-### Puzzle Taxonomy
+## Puzzle Taxonomy
 
 The figure below shows the taxonomy of abstract puzzles in PuzzleVQA with sample questions, based on fundamental
 concepts
@@ -49,7 +100,7 @@ such as colors and size. To enhance diversity, we design both single-concept and
 
 ![](/img/taxonomy.png)
 
-### Evaluation Results
+## Evaluation Results
 
 We report the main evaluation results on single-concept and dual-concept puzzles in Table 1 and Table 2 respectively.
 The evaluation results for single-concept puzzles, as shown in Table 1 reveal notable differences in performance among
@@ -72,7 +123,7 @@ concepts such as colors and numbers together.
 ![](/img/results.png)
 
 
-### Citation
+## Citation
 
 ```
 @misc{chia2024puzzlevqa,
@@ -85,16 +136,16 @@ concepts such as colors and numbers together.
 }
 ```
 
-## Algorithmic Puzzles
+# AlgoPuzzleVQA
 
 We introduce the novel task of multimodal puzzle solving, framed within the context of visual question-answering. We present a new dataset, AlgoPuzzleVQA designed to challenge and evaluate the capabilities of multimodal language models in solving algorithmic puzzles that necessitate both visual understanding, language understanding, and complex algorithmic reasoning. We create the puzzles to encompass a diverse array of mathematical and algorithmic topics such as boolean logic, combinatorics, graph theory, optimization, search, etc., aiming to evaluate the gap between visual data interpretation and algorithmic problem-solving skills. The dataset is generated automatically from code authored by humans. All our puzzles have exact solutions that can be found from the algorithm without tedious human calculations. It ensures that our dataset can be scaled up arbitrarily in terms of reasoning complexity and dataset size. Our investigation reveals that large language models (LLMs) such as GPT4V and Gemini exhibit limited performance in puzzle-solving tasks. We find that their performance is near random in a multi-choice question-answering setup for a significant number of puzzles. The findings emphasize the challenges of integrating visual, language, and algorithmic knowledge for solving complex reasoning problems.
 
-### Daaset
+## Dataset
 
-PuzzleVQA is available [here](https://github.com/declare-lab/LLM-PuzzleTest/tree/master/AlgoPuzzleVQA/data) and also on [Huggingface](https://huggingface.co/datasets/declare-lab/AlgoPuzzleVQA).
+AlgoPuzzleVQA is available [here](https://github.com/declare-lab/LLM-PuzzleTest/tree/master/AlgoPuzzleVQA/data) and also on [Huggingface](https://huggingface.co/datasets/declare-lab/AlgoPuzzleVQA).
 
 
-### Visual Features of the Puzzles
+## Visual Features of the Puzzles
 
 The configuration of the puzzle/problem is shown as an image, which constitutes its visual context. We identify the following fundamental aspects of the visual context that influence the nature of the puzzles:
 
@@ -108,7 +159,7 @@ The configuration of the puzzle/problem is shown as an image, which constitutes 
 </p>
 
 
-### Algorithmic Features of the Puzzles
+## Algorithmic Features of the Puzzles
 
 We also identify the algorithmic concepts required for solving the puzzles i.e. for answering the questions for the puzzle instances. They are as follows:
 
@@ -127,7 +178,7 @@ We also identify the algorithmic concepts required for solving the puzzles i.e. 
 The algorithmic categories are not mutually exclusive, as we need to use two or more categories to derive the answer for most puzzles.
 
 
-### Dataset
+## Dataset
 
 The dataset is available [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA/data) in [these format](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA#dataset). We created a total of 18 different puzzles spanning various algorithmic and mathematical topics. Many of these puzzles are popular in various recreational or academic settings.
 
@@ -138,7 +189,7 @@ We currently consider the full dataset as an **evaluation-only** benchmark. The 
 Instructions for generating the dataset can be found [here](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA#dataset-generation). The number of instances and the difficulty of the puzzles can be scaled arbitrarily to any desired size or level.
 
 
-### Ontology
+## Ontology
 
 The ontological categorization of the puzzles are as follows:
 
@@ -147,12 +198,12 @@ The ontological categorization of the puzzles are as follows:
 </p>
 
 
-### Experiments
+## Experiments
 
 The experimental setup and scripts can be found in the [AlgoPuzzleVQA](https://github.com/declare-lab/puzzle-reasoning/tree/master/AlgoPuzzleVQA) directory.
 
 
-### Citation
+## Citation
 
 Please consider citing the following article if you found our work useful:
 

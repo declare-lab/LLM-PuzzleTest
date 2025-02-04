@@ -1,8 +1,8 @@
 /.idea/
 __pycache__
-outputs
-gemini_vision_info.json
-openai_vision_info.json
-claude_info.json
 .env
 .DS_store
+outputs
+gpt4t.json
+gpt4o.json
+o1-full-high.json

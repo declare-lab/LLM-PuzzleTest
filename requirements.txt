@@ -1,0 +1,6 @@
+fire==0.5.0
+pydantic==1.10.13
+tqdm==4.66.1
+openai==1.59.8
+requests==2.32.3
+Pillow==10.1.0

@@ -1,6 +1,6 @@
 # Multimodal Puzzle Reasoning with LLMs
 
-![Static Badge](https://img.shields.io/badge/PuzzleVQA-purple?style=flat&link=https%3A%2F%2Fhuggingface.co%2Fdatasets%2Fdeclare-lab%2Fpuzzlevqa) ![Static Badge](https://img.shields.io/badge/AlgoPuzzleVQA-purple?style=flat&link=https%3A%2F%2Fhuggingface.co%2Fdatasets%2Fdeclare-lab%2FAlgoPuzzleVQA)
+[![Static Badge](https://img.shields.io/badge/PuzzleVQA-purple?style=flat&link=https%3A%2F%2Fhuggingface.co%2Fdatasets%2Fdeclare-lab%2Fpuzzlevqa)](https://huggingface.co/datasets/declare-lab/puzzlevqa) [![Static Badge](https://img.shields.io/badge/AlgoPuzzleVQA-purple?style=flat&link=https%3A%2F%2Fhuggingface.co%2Fdatasets%2Fdeclare-lab%2FAlgoPuzzleVQA)](https://huggingface.co/datasets/declare-lab/AlgoPuzzleVQA)
 
 > 🧗 We present a holistic performance of GPT-[n] and o-[n] models on PuzzleVQA and AlgoPuzzleVQA across both Open-Ended and Multiple-Choice settings.
 [Paper](https://arxiv.org/abs/2502.01081)

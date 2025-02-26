@@ -75,6 +75,17 @@ python main.py evaluate --dataset PuzzleVQA --puzzle shape_reflect --question_ty
 python main.py evaluate --dataset AlgoPuzzleVQA --puzzle board_tile --question_type mcq --model_name o1 --output_dir outputs
 ```
 
+## Citation
+
+```bibtex
+@article{toh2025jumping,
+  title={The Jumping Reasoning Curve? Tracking the Evolution of Reasoning Performance in GPT-[n] and o-[n] Models on Multimodal Puzzles},
+  author={Toh, Vernon YH and Chia, Yew Ken and Ghosal, Deepanway and Poria, Soujanya},
+  journal={arXiv preprint arXiv:2502.01081},
+  year={2025}
+}
+```
+
 
 # PuzzleVQA
 
